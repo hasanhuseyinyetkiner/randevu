@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Randevu Sistemi - Giriş</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {}
+            }
+        }
+    </script>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
     <div id="app" class="container mx-auto px-4 py-8">
@@ -73,7 +80,9 @@
                 const response = await fetch(`${API_BASE}/check-user`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ isim, soyisim, sifre })
+                    body: JSON.stringify({ isim, soyisim, sifre }),
+                    mode: 'cors',
+                    credentials: 'include'
                 });
                 
                 const result = await response.json();
@@ -98,7 +107,7 @@
             } catch (error) {
                 console.error('Hata:', error);
                 document.getElementById('error').classList.remove('hidden');
-                document.getElementById('error').textContent = 'Sunucuya bağlanılamadı!';
+                document.getElementById('error').textContent = `Sunucuya bağlanılamadı! (${error.message})`; 
             }
         });
     </script>

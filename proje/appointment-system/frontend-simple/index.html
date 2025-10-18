@@ -1,437 +1,103 @@
-<!DOCTYPE html>
+<\!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Randevu Sistemi</title>
+    <title>Randevu Sistemi - Giriş</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
-    <div id="app" class="container mx-auto px-4 py-8"></div>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center">
+    <div class="max-w-md w-full mx-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-8">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full mx-auto mb-4 flex items-center justify-center">
+                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Randevu Sistemi</h1>
+                <p class="text-gray-600">İsminizi girerek devam edin</p>
+            </div>
+
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">İsim</label>
+                    <input type="text" id="isim" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                        placeholder="Örn: Ahmet">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Soyisim</label>
+                    <input type="text" id="soyisim" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                        placeholder="Örn: Yılmaz">
+                </div>
+                <button type="submit" 
+                    class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition shadow-lg">
+                    Devam Et →
+                </button>
+            </form>
+
+            <div id="error" class="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg hidden"></div>
+            <div id="loading" class="mt-4 text-center text-gray-600 hidden">
+                <svg class="animate-spin h-5 w-5 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <p class="mt-2">Kontrol ediliyor...</p>
+            </div>
+        </div>
+    </div>
 
     <script>
         const API_BASE = 'http://localhost:3001/api';
-        const app = document.getElementById('app');
-        let currentUser = null;
 
-        // Kullanıcı kontrolü
-        async function checkUser(isim, soyisim, sifre = '') {
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const isim = document.getElementById('isim').value.trim();
+            const soyisim = document.getElementById('soyisim').value.trim();
+            const errorDiv = document.getElementById('error');
+            const loadingDiv = document.getElementById('loading');
+            
+            errorDiv.classList.add('hidden');
+            loadingDiv.classList.remove('hidden');
+            
             try {
                 const response = await fetch(`${API_BASE}/check-user`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ isim, soyisim, sifre })
+                    body: JSON.stringify({ isim, soyisim })
                 });
+                
                 const data = await response.json();
-                return data;
-            } catch (error) {
-                console.error('Hata:', error);
-                return { success: false, message: 'Bağlantı hatası' };
-            }
-        }
-
-        // Randevu oluştur
-        async function createAppointment(data) {
-            try {
-                const response = await fetch(`${API_BASE}/add-appointment`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                return await response.json();
-            } catch (error) {
-                console.error('Hata:', error);
-                return { success: false, message: 'Bağlantı hatası' };
-            }
-        }
-
-        // Randevuları getir
-        async function getAppointments(filter = {}) {
-            try {
-                const params = new URLSearchParams(filter);
-                const response = await fetch(`${API_BASE}/get-appointments?${params}`);
-                return await response.json();
-            } catch (error) {
-                console.error('Hata:', error);
-                return [];
-            }
-        }
-
-        // Kullanıcı ekle (Admin)
-        async function addUser(data) {
-            try {
-                const response = await fetch(`${API_BASE}/add-user`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer admin_secret_2025_xyz123'
-                    },
-                    body: JSON.stringify(data)
-                });
-                return await response.json();
-            } catch (error) {
-                console.error('Hata:', error);
-                return { success: false };
-            }
-        }
-
-        // Randevu güncelle (Admin)
-        async function updateAppointment(id, data) {
-            try {
-                const response = await fetch(`${API_BASE}/update-appointment?id=${id}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                return await response.json();
-            } catch (error) {
-                console.error('Hata:', error);
-                return { success: false };
-            }
-        }
-
-        // Giriş Sayfası
-        function renderLoginPage() {
-            app.innerHTML = `
-                <div class="max-w-md mx-auto mt-20">
-                    <div class="bg-white rounded-2xl shadow-2xl p-8">
-                        <div class="text-center mb-8">
-                            <div class="w-16 h-16 bg-blue-600 rounded-full mx-auto mb-4 flex items-center justify-center">
-                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                </svg>
-                            </div>
-                            <h1 class="text-3xl font-bold text-gray-900">Randevu Sistemi</h1>
-                            <p class="text-gray-600 mt-2">İsminizi girin</p>
-                        </div>
-
-                        <form id="loginForm" class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">İsim</label>
-                                <input type="text" id="isim" required
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="Ahmet">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Soyisim</label>
-                                <input type="text" id="soyisim" required
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="Yılmaz">
-                            </div>
-                            <button type="submit" 
-                                class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
-                                Devam Et
-                            </button>
-                        </form>
-
-                        <div id="error" class="mt-4 text-red-600 text-sm text-center hidden"></div>
-                    </div>
-                </div>
-            `;
-
-            document.getElementById('loginForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const isim = document.getElementById('isim').value;
-                const soyisim = document.getElementById('soyisim').value;
+                loadingDiv.classList.add('hidden');
                 
-                const result = await checkUser(isim, soyisim);
-                
-                if (result.success) {
-                    currentUser = result.user;
-                    if (result.user.rol === 'admin') {
-                        renderAdminPage();
-                    } else if (result.user.rol === 'doktor') {
-                        renderDoktorPage();
+                if (data.success && data.user) {
+                    const rol = data.user.rol.toLowerCase();
+                    
+                    if (rol === 'admin') {
+                        window.location.href = 'admin.html';
+                    } else if (rol === 'doktor') {
+                        window.location.href = 'doktor.html';
+                    } else if (rol === 'hasta') {
+                        // Hasta için telefon parametresi ile yönlendir
+                        window.location.href = `hasta.html?telefon=${encodeURIComponent(data.user.telefon)}`;
                     } else {
-                        renderHastaPage();
+                        errorDiv.textContent = '⚠️ Bilinmeyen kullanıcı rolü!';
+                        errorDiv.classList.remove('hidden');
                     }
                 } else {
-                    document.getElementById('error').classList.remove('hidden');
-                    document.getElementById('error').textContent = 'Kullanıcı bulunamadı!';
+                    errorDiv.textContent = '❌ Kullanıcı bulunamadı\! Lütfen isim ve soyisminizi kontrol edin.';
+                    errorDiv.classList.remove('hidden');
                 }
-            });
-        }
-
-        // Admin Sayfası
-        function renderAdminPage() {
-            app.innerHTML = `
-                <div class="max-w-6xl mx-auto">
-                    <div class="bg-white rounded-2xl shadow-xl p-8 mb-6">
-                        <div class="flex justify-between items-center mb-6">
-                            <div>
-                                <h1 class="text-3xl font-bold text-gray-900">Admin Panel</h1>
-                                <p class="text-gray-600">Hoş geldin, ${currentUser.isim} ${currentUser.soyisim}</p>
-                            </div>
-                            <button onclick="renderLoginPage()" 
-                                class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
-                                Çıkış
-                            </button>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Kullanıcı Ekleme -->
-                            <div class="border border-gray-200 rounded-lg p-6">
-                                <h2 class="text-xl font-bold mb-4">Yeni Kullanıcı Ekle</h2>
-                                <form id="addUserForm" class="space-y-3">
-                                    <input type="text" id="newIsim" placeholder="İsim" required
-                                        class="w-full px-3 py-2 border rounded-lg">
-                                    <input type="text" id="newSoyisim" placeholder="Soyisim" required
-                                        class="w-full px-3 py-2 border rounded-lg">
-                                    <select id="newRol" required class="w-full px-3 py-2 border rounded-lg">
-                                        <option value="">Rol Seçin</option>
-                                        <option value="doktor">Doktor</option>
-                                        <option value="hasta">Hasta</option>
-                                    </select>
-                                    <input type="text" id="newDoktorId" placeholder="Doktor ID (sadece hasta için)"
-                                        class="w-full px-3 py-2 border rounded-lg">
-                                    <button type="submit" 
-                                        class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">
-                                        Ekle
-                                    </button>
-                                </form>
-                                <div id="addUserResult" class="mt-3 text-sm"></div>
-                            </div>
-
-                            <!-- Randevular -->
-                            <div class="border border-gray-200 rounded-lg p-6">
-                                <h2 class="text-xl font-bold mb-4">Tüm Randevular</h2>
-                                <button onclick="loadAllAppointments()" 
-                                    class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 mb-4">
-                                    Yenile
-                                </button>
-                                <div id="appointmentsList" class="space-y-2 max-h-96 overflow-y-auto"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            document.getElementById('addUserForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const result = await addUser({
-                    isim: document.getElementById('newIsim').value,
-                    soyisim: document.getElementById('newSoyisim').value,
-                    rol: document.getElementById('newRol').value,
-                    doktorId: document.getElementById('newDoktorId').value
-                });
-                
-                document.getElementById('addUserResult').innerHTML = result.success 
-                    ? '<span class="text-green-600">✓ Kullanıcı eklendi!</span>'
-                    : '<span class="text-red-600">✗ Hata oluştu!</span>';
-                
-                e.target.reset();
-            });
-
-            loadAllAppointments();
-        }
-
-        async function loadAllAppointments() {
-            const appointments = await getAppointments();
-            const list = document.getElementById('appointmentsList');
-            
-            if (appointments.length === 0) {
-                list.innerHTML = '<p class="text-gray-500">Henüz randevu yok</p>';
-                return;
+            } catch (error) {
+                loadingDiv.classList.add('hidden');
+                console.error('Hata:', error);
+                errorDiv.textContent = '⚠️ Bağlantı hatası\! Lütfen tekrar deneyin.';
+                errorDiv.classList.remove('hidden');
             }
-
-            list.innerHTML = appointments.map(apt => `
-                <div class="bg-gray-50 p-3 rounded-lg">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="font-semibold">${apt.HastaAdi} → ${apt.DoktorAdi}</p>
-                            <p class="text-sm text-gray-600">${apt.Tarih} ${apt.Saat}</p>
-                        </div>
-                        <select onchange="updateAppointmentStatus('${apt.ID}', this.value)"
-                            class="text-sm border rounded px-2 py-1">
-                            <option value="bekliyor" ${apt.Durum === 'bekliyor' ? 'selected' : ''}>⏳ Bekliyor</option>
-                            <option value="onaylandi" ${apt.Durum === 'onaylandi' ? 'selected' : ''}>✓ Onaylandı</option>
-                            <option value="iptal" ${apt.Durum === 'iptal' ? 'selected' : ''}>✗ İptal</option>
-                        </select>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        async function updateAppointmentStatus(id, durum) {
-            await updateAppointment(id, { durum });
-            loadAllAppointments();
-        }
-
-        // Doktor Sayfası
-        function renderDoktorPage() {
-            app.innerHTML = `
-                <div class="max-w-4xl mx-auto">
-                    <div class="bg-white rounded-2xl shadow-xl p-8">
-                        <div class="flex justify-between items-center mb-6">
-                            <div>
-                                <h1 class="text-3xl font-bold text-gray-900">Dr. ${currentUser.isim} ${currentUser.soyisim}</h1>
-                                <p class="text-gray-600">Randevularınız</p>
-                            </div>
-                            <button onclick="renderLoginPage()" 
-                                class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
-                                Çıkış
-                            </button>
-                        </div>
-
-                        <button onclick="loadDoktorAppointments()" 
-                            class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 mb-4">
-                            Yenile (Her 5 saniye otomatik)
-                        </button>
-
-                        <div id="doktorAppointments" class="space-y-3"></div>
-                    </div>
-                </div>
-            `;
-
-            loadDoktorAppointments();
-            setInterval(loadDoktorAppointments, 5000); // Her 5 saniyede yenile
-        }
-
-        async function loadDoktorAppointments() {
-            const appointments = await getAppointments({ doktorId: currentUser.id });
-            const list = document.getElementById('doktorAppointments');
-            
-            if (!list) return;
-
-            if (appointments.length === 0) {
-                list.innerHTML = '<p class="text-gray-500 text-center py-8">Henüz randevu yok</p>';
-                return;
-            }
-
-            list.innerHTML = appointments.map(apt => `
-                <div class="border-l-4 ${apt.Durum === 'onaylandi' ? 'border-green-500' : 'border-yellow-500'} bg-gray-50 p-4 rounded-lg">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="font-bold text-lg">${apt.HastaAdi}</p>
-                            <p class="text-gray-600">${apt.Tarih} - ${apt.Saat}</p>
-                        </div>
-                        <span class="px-3 py-1 rounded-full text-sm ${
-                            apt.Durum === 'onaylandi' ? 'bg-green-100 text-green-800' : 
-                            apt.Durum === 'iptal' ? 'bg-red-100 text-red-800' :
-                            'bg-yellow-100 text-yellow-800'
-                        }">
-                            ${apt.Durum === 'onaylandi' ? '✓ Onaylı' : apt.Durum === 'iptal' ? '✗ İptal' : '⏳ Bekliyor'}
-                        </span>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Hasta Sayfası
-        function renderHastaPage() {
-            app.innerHTML = `
-                <div class="max-w-4xl mx-auto">
-                    <div class="bg-white rounded-2xl shadow-xl p-8">
-                        <div class="flex justify-between items-center mb-6">
-                            <div>
-                                <h1 class="text-3xl font-bold text-gray-900">Merhaba ${currentUser.isim}!</h1>
-                                <p class="text-gray-600">Randevu alabilirsiniz</p>
-                            </div>
-                            <button onclick="renderLoginPage()" 
-                                class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
-                                Çıkış
-                            </button>
-                        </div>
-
-                        ${!currentUser.doktorId ? `
-                            <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 p-4 rounded-lg mb-6">
-                                ⚠️ Henüz size bir doktor atanmamış. Lütfen yönetici ile iletişime geçin.
-                            </div>
-                        ` : `
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <!-- Randevu Alma Formu -->
-                                <div class="border border-gray-200 rounded-lg p-6">
-                                    <h2 class="text-xl font-bold mb-4">Yeni Randevu</h2>
-                                    <form id="appointmentForm" class="space-y-4">
-                                        <div>
-                                            <label class="block text-sm font-medium mb-2">Tarih</label>
-                                            <input type="date" id="tarih" required
-                                                class="w-full px-3 py-2 border rounded-lg">
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium mb-2">Saat</label>
-                                            <input type="time" id="saat" required
-                                                class="w-full px-3 py-2 border rounded-lg">
-                                        </div>
-                                        <button type="submit" 
-                                            class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700">
-                                            Randevu Oluştur
-                                        </button>
-                                    </form>
-                                    <div id="appointmentResult" class="mt-4 text-sm"></div>
-                                </div>
-
-                                <!-- Randevularım -->
-                                <div class="border border-gray-200 rounded-lg p-6">
-                                    <h2 class="text-xl font-bold mb-4">Randevularım</h2>
-                                    <button onclick="loadHastaAppointments()" 
-                                        class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 mb-4">
-                                        Yenile
-                                    </button>
-                                    <div id="hastaAppointments" class="space-y-2"></div>
-                                </div>
-                            </div>
-                        `}
-                    </div>
-                </div>
-            `;
-
-            if (currentUser.doktorId) {
-                document.getElementById('appointmentForm').addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    
-                    const result = await createAppointment({
-                        hastaId: currentUser.id,
-                        hastaAdi: `${currentUser.isim} ${currentUser.soyisim}`,
-                        doktorId: currentUser.doktorId,
-                        doktorAdi: "Doktor", // Doktor adını almak için ek query gerekir
-                        tarih: document.getElementById('tarih').value,
-                        saat: document.getElementById('saat').value
-                    });
-                    
-                    document.getElementById('appointmentResult').innerHTML = result.success 
-                        ? '<span class="text-green-600">✓ Randevu oluşturuldu! Admin onayını bekleyin.</span>'
-                        : '<span class="text-red-600">✗ Hata oluştu!</span>';
-                    
-                    if (result.success) {
-                        e.target.reset();
-                        setTimeout(loadHastaAppointments, 1000);
-                    }
-                });
-
-                loadHastaAppointments();
-                setInterval(loadHastaAppointments, 5000); // Her 5 saniyede yenile
-            }
-        }
-
-        async function loadHastaAppointments() {
-            const appointments = await getAppointments({ hastaId: currentUser.id });
-            const list = document.getElementById('hastaAppointments');
-            
-            if (!list) return;
-
-            if (appointments.length === 0) {
-                list.innerHTML = '<p class="text-gray-500">Henüz randevu yok</p>';
-                return;
-            }
-
-            list.innerHTML = appointments.map(apt => `
-                <div class="bg-gray-50 p-3 rounded-lg">
-                    <p class="font-semibold">${apt.Tarih} - ${apt.Saat}</p>
-                    <p class="text-sm text-gray-600">${apt.DoktorAdi}</p>
-                    <span class="inline-block mt-1 px-2 py-1 rounded-full text-xs ${
-                        apt.Durum === 'onaylandi' ? 'bg-green-100 text-green-800' : 
-                        apt.Durum === 'iptal' ? 'bg-red-100 text-red-800' :
-                        'bg-yellow-100 text-yellow-800'
-                    }">
-                        ${apt.Durum === 'onaylandi' ? '✓ Onaylandı' : apt.Durum === 'iptal' ? '✗ İptal Edildi' : '⏳ Bekliyor'}
-                    </span>
-                </div>
-            `).join('');
-        }
-
-        // Başlangıç
-        renderLoginPage();
+        });
     </script>
 </body>
 </html>

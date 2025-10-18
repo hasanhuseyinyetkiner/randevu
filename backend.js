@@ -69,12 +69,34 @@ async function initializeSheets() {
       return false;
     }
 
+    // Header'ları yükle
+    for (const [key, sheet] of Object.entries(sheets)) {
+      if (sheet) {
+        await sheet.loadHeaderRow();
+      }
+    }
+
     console.log('✅ Google Sheets bağlantısı başarılı!');
     return true;
   } catch (error) {
     console.error('❌ Google Sheets bağlantı hatası:', error.message);
     console.warn('⚠️ JSON dosyaları modu aktif edilecek.');
     return false;
+  }
+}
+
+// Helper: Google Sheets row'u objeye çevir
+function rowToObject(row) {
+  if (!row) {
+    return {};
+  }
+  
+  try {
+    // Google Sheets API'nin toObject() metodunu kullan
+    return row.toObject ? row.toObject() : row;
+  } catch (error) {
+    console.error('Error converting row to object:', error);
+    return {};
   }
 }
 
@@ -157,7 +179,7 @@ async function checkAppointmentConflict(doktorId, tarih, saat, hizmetSuresi, exc
   
   if (useGoogleSheets) {
     const rows = await sheets.appointments.getRows();
-    appointments = rows.map(row => row._rawData);
+    appointments = rows.map(row => rowToObject(row));
   } else {
     appointments = await readData(APPOINTMENTS_FILE);
   }
@@ -180,7 +202,7 @@ async function checkAppointmentConflict(doktorId, tarih, saat, hizmetSuresi, exc
     let aptDuration = 30; // Varsayılan
     if (apt.HizmetID) {
       const services = useGoogleSheets 
-        ? (await sheets.services.getRows()).map(row => row._rawData)
+        ? (await sheets.services.getRows()).map(row => rowToObject(row))
         : await readData(SERVICES_FILE);
       const service = services.find(s => String(s.ID) === String(apt.HizmetID));
       if (service) aptDuration = parseInt(service.Sure);
@@ -209,7 +231,7 @@ async function checkDoctorAvailability(doktorId, tarih, saat) {
   
   if (useGoogleSheets) {
     const rows = await sheets.availabilities.getRows();
-    availabilities = rows.map(row => row._rawData);
+    availabilities = rows.map(row => rowToObject(row));
   } else {
     availabilities = await readData(AVAILABILITIES_FILE);
   }
@@ -330,7 +352,17 @@ app.post('/api/check-user', async (req, res) => {
 
     if (useGoogleSheets) {
       const rows = await sheets.users.getRows();
-      users = rows.map(row => row._rawData);
+      users = rows.map(row => ({
+        ID: row.get('ID'),
+        Isim: row.get('Isim'),
+        Soyisim: row.get('Soyisim'),
+        Rol: row.get('Rol'),
+        Telefon: row.get('Telefon'),
+        Sifre: row.get('Sifre'),
+        Slug: row.get('Slug'),
+        DoktorID: row.get('DoktorID'),
+        KayitTarihi: row.get('KayitTarihi')
+      }));
     } else {
       users = await readData(USERS_FILE);
     }
@@ -398,7 +430,17 @@ app.get('/api/get-users', async (req, res) => {
 
     if (useGoogleSheets) {
       const rows = await sheets.users.getRows();
-      users = rows.map(row => row._rawData);
+      users = rows.map(row => ({
+        ID: row.get('ID'),
+        Isim: row.get('Isim'),
+        Soyisim: row.get('Soyisim'),
+        Rol: row.get('Rol'),
+        Telefon: row.get('Telefon'),
+        Sifre: row.get('Sifre'),
+        Slug: row.get('Slug'),
+        DoktorID: row.get('DoktorID'),
+        KayitTarihi: row.get('KayitTarihi')
+      }));
     } else {
       users = await readData(USERS_FILE);
     }
@@ -573,7 +615,7 @@ app.post('/api/add-appointment', async (req, res) => {
       let services;
       if (useGoogleSheets) {
         const rows = await sheets.services.getRows();
-        services = rows.map(row => row._rawData);
+        services = rows.map(row => rowToObject(row));
       } else {
         services = await readData(SERVICES_FILE);
       }
@@ -636,7 +678,7 @@ app.get('/api/get-appointments', async (req, res) => {
 
     if (useGoogleSheets) {
       const rows = await sheets.appointments.getRows();
-      appointments = rows.map(row => row._rawData);
+      appointments = rows.map(row => rowToObject(row));
     } else {
       appointments = await readData(APPOINTMENTS_FILE);
     }
@@ -677,7 +719,7 @@ app.post('/api/update-appointment', async (req, res) => {
         
         let hizmetSuresi = 30;
         if (row.HizmetID) {
-          const services = (await sheets.services.getRows()).map(r => r._rawData);
+          const services = (await sheets.services.getRows()).map(r => rowToObject(r));
           const service = services.find(s => String(s.ID) === String(row.HizmetID));
           if (service) hizmetSuresi = parseInt(service.Sure);
         }
@@ -1123,7 +1165,7 @@ app.get('/api/get-services', async (req, res) => {
 
     if (useGoogleSheets) {
       const rows = await sheets.services.getRows();
-      services = rows.map(row => row._rawData);
+      services = rows.map(row => rowToObject(row));
     } else {
       services = await readData(SERVICES_FILE);
     }
@@ -1385,11 +1427,11 @@ app.get('/api/get-availabilities', async (req, res) => {
 
     if (useGoogleSheets) {
       const rows = await sheets.availabilities.getRows();
-      availabilities = rows.map(row => row._rawData);
+      availabilities = rows.map(row => rowToObject(row));
     } else {
       availabilities = await readData(AVAILABILITIES_FILE);
     }
-
+    
     if (doktorId) availabilities = availabilities.filter(a => String(a.DoktorID) === String(doktorId));
     if (tarih) availabilities = availabilities.filter(a => a.Tarih === tarih);
 

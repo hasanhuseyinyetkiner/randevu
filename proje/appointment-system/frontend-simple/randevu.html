@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Randevu Al</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {}
+            }
+        }
+    </script>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
     <div id="app" class="container mx-auto px-4 py-8 max-w-2xl">
@@ -111,7 +118,7 @@
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:5678/webhook';
+        const API_BASE = 'http://localhost:3001/api';
         let currentDoctor = null;
         let doktorId = null;
 
