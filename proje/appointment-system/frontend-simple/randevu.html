@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Randevu Al</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <div id="app" class="container mx-auto px-4 py-8 max-w-2xl">
+        <!-- Yükleniyor -->
+        <div id="loading" class="text-center py-20">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p class="mt-4 text-gray-600">Yükleniyor...</p>
+        </div>
+
+        <!-- Hata -->
+        <div id="error" class="hidden bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+            <svg class="w-12 h-12 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <h2 class="text-xl font-bold text-red-800 mb-2">Bir Hata Oluştu</h2>
+            <p id="errorMessage" class="text-red-600"></p>
+        </div>
+
+        <!-- Randevu Formu -->
+        <div id="bookingForm" class="hidden bg-white rounded-2xl shadow-xl p-8">
+            <!-- Doktor Bilgisi -->
+            <div class="text-center mb-8 pb-6 border-b">
+                <div class="w-20 h-20 bg-blue-600 rounded-full mx-auto mb-4 flex items-center justify-center">
+                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-900" id="doctorName"></h1>
+                <p class="text-gray-600 mt-2">Randevu Alma Formu</p>
+            </div>
+
+            <form id="appointmentForm" class="space-y-6">
+                <!-- Hasta Bilgileri -->
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="font-semibold mb-3 text-lg">İletişim Bilgileriniz</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Telefon Numaranız</label>
+                            <input type="tel" id="telefon" required placeholder="05XX XXX XX XX"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Adınız</label>
+                                <input type="text" id="isim" required
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Soyadınız</label>
+                                <input type="text" id="soyisim" required
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hizmet Seçimi -->
+                <div>
+                    <label class="block text-sm font-medium mb-2">Hizmet Seçin</label>
+                    <select id="hizmetSelect" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-lg">
+                        <option value="">Hizmet seçin...</option>
+                    </select>
+                    <p id="hizmetSuresi" class="text-xs text-gray-500 mt-1"></p>
+                </div>
+
+                <!-- Tarih Seçimi -->
+                <div>
+                    <label class="block text-sm font-medium mb-2">Tarih Seçin</label>
+                    <input type="date" id="tarih" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-lg">
+                </div>
+
+                <!-- Saat Seçimi -->
+                <div>
+                    <label class="block text-sm font-medium mb-2">Müsait Saat Seçin</label>
+                    <select id="saatSelect" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-lg">
+                        <option value="">Önce tarih seçin</option>
+                    </select>
+                </div>
+
+                <!-- Gönder Butonu -->
+                <button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-lg font-semibold hover:bg-blue-700 transition text-lg">
+                    Randevu Oluştur
+                </button>
+            </form>
+
+            <div id="result" class="mt-4 text-center"></div>
+        </div>
+
+        <!-- Başarı Mesajı -->
+        <div id="success" class="hidden bg-white rounded-2xl shadow-xl p-8 text-center">
+            <div class="w-20 h-20 bg-green-500 rounded-full mx-auto mb-4 flex items-center justify-center">
+                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900 mb-2">Randevunuz Oluşturuldu!</h2>
+            <p class="text-gray-600 mb-6">Randevunuz başarıyla oluşturuldu. Doktorunuz randevunuzu onayladığında bilgilendirileceksiniz.</p>
+            <div id="appointmentDetails" class="bg-gray-50 p-4 rounded-lg mb-6 text-left"></div>
+            <button onclick="resetForm()" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700">
+                Yeni Randevu Al
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5678/webhook';
+        let currentDoctor = null;
+        let doktorId = null;
+
+        // URL'den doktor ID'sini al
+        const urlParams = new URLSearchParams(window.location.search);
+        doktorId = urlParams.get('doktorId');
+
+        if (!doktorId) {
+            showError('Geçersiz bağlantı. Doktor ID\'si bulunamadı.');
+        } else {
+            loadDoctorInfo();
+        }
+
+        // Doktor bilgilerini yükle
+        async function loadDoctorInfo() {
+            try {
+                const response = await fetch(`${API_BASE}/get-users?rol=doktor`);
+                const doctors = await response.json();
+                currentDoctor = doctors.find(d => d.id === doktorId);
+                
+                if (!currentDoctor) {
+                    showError('Doktor bulunamadı.');
+                    return;
+                }
+
+                document.getElementById('doctorName').textContent = `Dr. ${currentDoctor.isim} ${currentDoctor.soyisim}`;
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('bookingForm').classList.remove('hidden');
+
+                // Hizmetleri yükle
+                await loadServices();
+
+                // Bugünü minimum tarih olarak ayarla
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('tarih').min = today;
+
+            } catch (error) {
+                showError('Doktor bilgileri yüklenirken hata oluştu.');
+                console.error('Hata:', error);
+            }
+        }
+
+        // Hizmetleri yükle
+        async function loadServices() {
+            try {
+                const response = await fetch(`${API_BASE}/get-services`);
+                const services = await response.json();
+                const select = document.getElementById('hizmetSelect');
+                
+                select.innerHTML = '<option value="">Hizmet seçin...</option>';
+                services.forEach(service => {
+                    select.innerHTML += `<option value="${service.id}" data-duration="${service.sure}">${service.isim} (${service.sure} dk)</option>`;
+                });
+            } catch (error) {
+                console.error('Hizmetler yüklenemedi:', error);
+            }
+        }
+
+        // Hizmet seçildiğinde süreyi göster
+        document.addEventListener('DOMContentLoaded', () => {
+            const hizmetSelect = document.getElementById('hizmetSelect');
+            if (hizmetSelect) {
+                hizmetSelect.addEventListener('change', (e) => {
+                    const selected = e.target.selectedOptions[0];
+                    const duration = selected?.dataset?.duration;
+                    const suresiEl = document.getElementById('hizmetSuresi');
+                    if (duration && suresiEl) {
+                        suresiEl.textContent = `Bu işlem yaklaşık ${duration} dakika sürer`;
+                    } else if (suresiEl) {
+                        suresiEl.textContent = '';
+                    }
+                });
+            }
+
+            // Tarih değiştiğinde müsait saatleri getir
+            const tarihInput = document.getElementById('tarih');
+            if (tarihInput) {
+                tarihInput.addEventListener('change', async () => {
+                    const tarih = tarihInput.value;
+                    if (!doktorId || !tarih) return;
+                    
+                    try {
+                        const response = await fetch(`${API_BASE}/get-available-times?doktorId=${doktorId}&tarih=${tarih}`);
+                        const times = await response.json();
+                        const saatSelect = document.getElementById('saatSelect');
+                        
+                        if (times.length === 0) {
+                            saatSelect.innerHTML = '<option value="">Bu tarihte müsait saat yok</option>';
+                        } else {
+                            saatSelect.innerHTML = '<option value="">Saat seçin</option>';
+                            times.forEach(time => {
+                                saatSelect.innerHTML += `<option value="${time}">${time}</option>`;
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Müsait saatler yüklenemedi:', error);
+                        document.getElementById('saatSelect').innerHTML = '<option value="">Hata oluştu</option>';
+                    }
+                });
+            }
+
+            // Form gönderildiğinde
+            const form = document.getElementById('appointmentForm');
+            if (form) {
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    const telefon = document.getElementById('telefon').value;
+                    const isim = document.getElementById('isim').value;
+                    const soyisim = document.getElementById('soyisim').value;
+                    const hizmetSelect = document.getElementById('hizmetSelect');
+                    const selectedOption = hizmetSelect.selectedOptions[0];
+                    const tarih = document.getElementById('tarih').value;
+                    const saat = document.getElementById('saatSelect').value;
+
+                    const appointment = {
+                        telefon,
+                        hastaAdi: `${isim} ${soyisim}`,
+                        doktorId: doktorId,
+                        doktorAdi: `${currentDoctor.isim} ${currentDoctor.soyisim}`,
+                        hizmetId: hizmetSelect.value,
+                        hizmet: selectedOption.text,
+                        tarih,
+                        saat
+                    };
+
+                    try {
+                        const response = await fetch(`${API_BASE}/create-appointment`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(appointment)
+                        });
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            showSuccess(appointment);
+                        } else {
+                            document.getElementById('result').innerHTML = `<span class="text-red-600">✗ ${result.message || 'Hata oluştu!'}</span>`;
+                        }
+                    } catch (error) {
+                        document.getElementById('result').innerHTML = '<span class="text-red-600">✗ Bağlantı hatası!</span>';
+                        console.error('Randevu oluşturma hatası:', error);
+                    }
+                });
+            }
+        });
+
+        function showError(message) {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('bookingForm').classList.add('hidden');
+            document.getElementById('error').classList.remove('hidden');
+            document.getElementById('errorMessage').textContent = message;
+        }
+
+        function showSuccess(appointment) {
+            document.getElementById('bookingForm').classList.add('hidden');
+            document.getElementById('success').classList.remove('hidden');
+            
+            const detailsEl = document.getElementById('appointmentDetails');
+            detailsEl.innerHTML = `
+                <div class="space-y-2">
+                    <p><strong>Hasta:</strong> ${appointment.hastaAdi}</p>
+                    <p><strong>Telefon:</strong> ${appointment.telefon}</p>
+                    <p><strong>Doktor:</strong> Dr. ${appointment.doktorAdi}</p>
+                    <p><strong>Hizmet:</strong> ${appointment.hizmet}</p>
+                    <p><strong>Tarih:</strong> ${formatDate(appointment.tarih)}</p>
+                    <p><strong>Saat:</strong> ${appointment.saat}</p>
+                </div>
+            `;
+        }
+
+        function resetForm() {
+            document.getElementById('success').classList.add('hidden');
+            document.getElementById('bookingForm').classList.remove('hidden');
+            document.getElementById('appointmentForm').reset();
+            document.getElementById('result').innerHTML = '';
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', weekday: 'long' });
+        }
+    </script>
+</body>
+</html>

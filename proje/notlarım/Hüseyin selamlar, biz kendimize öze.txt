@@ -1,0 +1,13 @@
+Hüseyin selamlar, biz kendimize özel bir takvim yapacağız. Bu takvimde şöyle özellikler olacak:
+ 	•	İptaller / değişiklikler yapabilme özelliği olacak.
+ 	•	Aynı saate birden fazla kişiye randevu verilebilecek.
+ 	•	Bazı saatlerde aynı anda birine 15 dakika, diğerine 1 saat randevu verme opsiyonu olacak.
+ 	•	Departman yapısı olacak. Mesela dişçi kliniği örneği: dolgu, implant vs. gibi alt departmanlar olacak.
+ 	•	Dolgu 15 dakikalık aralıklarla randevu verecek.
+ 	•	İmplant 1 saatlik aralıklarla randevu verecek.
+ 	•	İkisi de aynı anda (örneğin 12:00’de) başlayabilecek.
+
+Yani sistem esnek olacak, departmanlara göre farklı sürelerde randevu ayarlayabilecek.
+
+Senin tahminine göre böyle bir takvimi sıfırdan yazmak kaç gününü alır?
+Yoksa mevcut bir açık kaynak / hazır kod tabanı bulup, oradan alıp uyarlayarak daha kısa sürede yapabilir miyiz?

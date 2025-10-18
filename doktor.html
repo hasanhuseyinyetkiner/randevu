@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doktor Paneli</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-purple-50 to-pink-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white rounded-2xl shadow-xl p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900" id="userName"></h1>
+                        <p class="text-gray-600">Randevularınız</p>
+                    </div>
+                    <button onclick="logout()" 
+                        class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
+                        Çıkış
+                    </button>
+                </div>
+
+                <button onclick="loadAppointments()" 
+                    class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 mb-4">
+                    🔄 Yenile
+                </button>
+
+                <div id="appointmentsList" class="space-y-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3001/api';
+        let currentUser = null;
+
+        window.onload = function() {
+            const userData = localStorage.getItem('currentUser');
+            if (!userData) {
+                window.location.href = 'index.html';
+                return;
+            }
+            currentUser = JSON.parse(userData);
+            if (currentUser.rol !== 'doktor') {
+                window.location.href = 'index.html';
+                return;
+            }
+            document.getElementById('userName').textContent = `Dr. ${currentUser.isim} ${currentUser.soyisim}`;
+            loadAppointments();
+            setInterval(loadAppointments, 5000); // 5 saniyede bir yenile
+        };
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        }
+
+        async function loadAppointments() {
+            const response = await fetch(`${API_BASE}/get-appointments?doktorId=${currentUser.id}`);
+            const appointments = await response.json();
+            const list = document.getElementById('appointmentsList');
+            
+            if (appointments.length === 0) {
+                list.innerHTML = '<p class="text-gray-500 text-center py-8">Henüz randevu yok</p>';
+                return;
+            }
+
+            list.innerHTML = appointments.map(apt => `
+                <div class="border-l-4 ${apt.Durum === 'onaylandı' ? 'border-green-500' : apt.Durum === 'iptal' ? 'border-red-500' : 'border-yellow-500'} bg-gray-50 p-4 rounded-lg">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="font-bold text-lg">${apt.HastaAdi}</p>
+                            <p class="text-gray-600">${apt.Tarih} - ${apt.Saat}</p>
+                            ${apt.HastaTelefon ? `<p class="text-sm text-gray-500">📞 ${apt.HastaTelefon}</p>` : ''}
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-sm ${
+                            apt.Durum === 'onaylandı' ? 'bg-green-100 text-green-800' : 
+                            apt.Durum === 'iptal' ? 'bg-red-100 text-red-800' :
+                            'bg-yellow-100 text-yellow-800'
+                        }">
+                            ${apt.Durum === 'onaylandı' ? '✓ Onaylı' : apt.Durum === 'iptal' ? '✗ İptal' : '⏳ Bekliyor'}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

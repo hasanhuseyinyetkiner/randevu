@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doktor - Randevu Sistemi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-green-50 to-emerald-100 min-h-screen">
+    <div id="app" class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Login Formu -->
+        <div id="loginSection" class="bg-white rounded-2xl shadow-2xl p-8 mb-6 max-w-md mx-auto">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-green-600 rounded-full mx-auto mb-4 flex items-center justify-center">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-900">Doktor Girişi</h1>
+                <p class="text-gray-600 mt-2">İsim ve soyisminizi girin</p>
+            </div>
+
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">İsim</label>
+                    <input type="text" id="isim" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Soyisim</label>
+                    <input type="text" id="soyisim" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Şifre</label>
+                    <input type="password" id="sifre" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                </div>
+                <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition">
+                    Giriş Yap
+                </button>
+            </form>
+
+            <div id="loginError" class="mt-4 text-red-600 text-sm text-center hidden"></div>
+        </div>
+
+        <!-- Ana Sayfa (Login sonrası) -->
+        <div id="mainSection" class="hidden">
+            <div class="bg-white rounded-2xl shadow-xl p-8 mb-6">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900" id="userName"></h1>
+                        <p class="text-gray-600">Randevularınız</p>
+                    </div>
+                    <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
+                        Çıkış
+                    </button>
+                </div>
+
+                <!-- İstatistikler -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <p class="text-sm text-gray-600">Toplam Randevu</p>
+                        <p class="text-2xl font-bold text-blue-600" id="totalCount">0</p>
+                    </div>
+                    <div class="bg-yellow-50 p-4 rounded-lg">
+                        <p class="text-sm text-gray-600">Bekleyen</p>
+                        <p class="text-2xl font-bold text-yellow-600" id="pendingCount">0</p>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <p class="text-sm text-gray-600">Onaylı</p>
+                        <p class="text-2xl font-bold text-green-600" id="confirmedCount">0</p>
+                    </div>
+                </div>
+
+                <!-- Tab Menüsü -->
+                <div class="flex border-b mb-4">
+                    <button onclick="showTab('appointments')" id="tabAppointments" class="px-6 py-3 font-semibold border-b-2 border-green-600 text-green-600">Randevular</button>
+                    <button onclick="showTab('availability')" id="tabAvailability" class="px-6 py-3 font-semibold text-gray-500 hover:text-gray-700">Müsaitlik</button>
+                </div>
+
+                <!-- Randevular -->
+                <div id="appointmentsTab" class="tab-content">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold">Tüm Randevular</h2>
+                        <button onclick="loadAppointments()" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm">
+                            🔄 Yenile
+                        </button>
+                    </div>
+                    
+                    <!-- Filtre -->
+                    <div class="mb-4">
+                        <select id="filterStatus" onchange="loadAppointments()" class="px-4 py-2 border rounded-lg">
+                            <option value="">Tüm Randevular</option>
+                            <option value="bekliyor">Bekleyenler</option>
+                            <option value="onaylandi">Onaylananlar</option>
+                            <option value="iptal">İptal Edilenler</option>
+                        </select>
+                    </div>
+
+                    <div id="appointmentsList" class="space-y-3"></div>
+                </div>
+
+                <!-- Müsaitlik Yönetimi -->
+                <div id="availabilityTab" class="tab-content hidden">
+                    <h2 class="text-xl font-bold mb-4">Müsaitlik Yönetimi</h2>
+                    
+                    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                        <h3 class="font-semibold mb-2">Yeni Müsaitlik Ekle</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+                            <input id="avTarih" type="date" class="px-3 py-2 border rounded"/>
+                            <input id="avBaslangic" type="time" placeholder="Başlangıç" class="px-3 py-2 border rounded"/>
+                            <input id="avBitis" type="time" placeholder="Bitiş" class="px-3 py-2 border rounded"/>
+                            <button class="bg-green-600 text-white py-2 rounded" onclick="addAvailability()">+ Ekle</button>
+                        </div>
+                        <div id="availabilityAddMsg" class="text-sm mt-2"></div>
+                    </div>
+
+                    <div class="mt-6">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-lg font-semibold">Müsaitliklerim</h3>
+                            <button class="px-3 py-2 bg-gray-100 border rounded" onclick="loadMyAvailabilities()">Yenile</button>
+                        </div>
+                        <div id="myAvailabilitiesList" class="space-y-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5678/webhook';
+        let currentUser = null;
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('mainSection').classList.add('hidden');
+            document.getElementById('loginSection').classList.remove('hidden');
+        }
+
+        // Login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const isim = document.getElementById('isim').value;
+            const soyisim = document.getElementById('soyisim').value;
+            const sifre = document.getElementById('sifre').value;
+            
+            try {
+                const response = await fetch(`${API_BASE}/check-user`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ isim, soyisim, sifre })
+                });
+                const data = await response.json();
+                
+                if (data.success && data.user.rol === 'doktor') {
+                    currentUser = data.user;
+                    document.getElementById('loginSection').classList.add('hidden');
+                    document.getElementById('mainSection').classList.remove('hidden');
+                    document.getElementById('userName').textContent = `Dr. ${currentUser.isim} ${currentUser.soyisim}`;
+                    loadAppointments();
+                } else {
+                    document.getElementById('loginError').classList.remove('hidden');
+                    document.getElementById('loginError').textContent = 'Doktor bulunamadı veya şifre yanlış!';
+                }
+            } catch (error) {
+                document.getElementById('loginError').classList.remove('hidden');
+                document.getElementById('loginError').textContent = 'Bağlantı hatası!';
+                console.error('Login hatası:', error);
+            }
+        });
+
+        // Yardımcı: durum normalizasyonu (sheet tutarsızlıkları için)
+        const normalizeStatus = (s) => {
+            // Türkçe karakterleri normalize et
+            const v = String(s || '')
+                .replace(/İ/g, 'i')  // Büyük İ -> i
+                .replace(/ı/g, 'i')  // Küçük ı -> i
+                .toLowerCase()
+                .replace(/ü/g, 'u')
+                .replace(/ö/g, 'o')
+                .replace(/ç/g, 'c')
+                .replace(/ğ/g, 'g')
+                .replace(/ş/g, 's')
+                .trim();
+            
+            if (v.includes('onay') || v.includes('tamam')) return 'onaylandi';
+            if (v.includes('iptal') || v.includes('ipt')) return 'iptal';
+            if (v.includes('bek')) return 'bekliyor';
+            return v || 'bekliyor';
+        };
+
+        // Randevuları yükle
+        async function loadAppointments() {
+            if (!currentUser) return;
+
+            try {
+                const filter = document.getElementById('filterStatus')?.value || '';
+                let url = `${API_BASE}/get-appointments?doktorId=${currentUser.id}`;
+                // Backend filtreyi desteklemese de tümünü çekip client-side filtre uygularız
+                const response = await fetch(url);
+                let appointments = await response.json();
+
+                // Client-side filtre (gelen veride tutarsız anahtar/etiketler olabilir)
+                if (filter) {
+                    appointments = appointments.filter(a => normalizeStatus(a.Durum) === filter);
+                }
+
+                const list = document.getElementById('appointmentsList');
+                
+                // İstatistikler
+                updateStats(appointments);
+
+                if (appointments.length === 0) {
+                    list.innerHTML = '<p class="text-gray-500 text-center py-8">Henüz randevu yok</p>';
+                    return;
+                }
+
+                // Tarihe göre sırala
+                appointments.sort((a, b) => new Date(a.Tarih) - new Date(b.Tarih));
+
+                list.innerHTML = appointments.map(apt => {
+                    const st = normalizeStatus(apt.Durum);
+                    const badgeClass = st === 'onaylandi' ? 'bg-green-100 text-green-800' : st === 'iptal' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800';
+                    const cardClass = st === 'onaylandi' ? 'border-green-500 bg-green-50' : st === 'iptal' ? 'border-red-500 bg-red-50' : 'border-yellow-500 bg-yellow-50';
+                    const label = st === 'onaylandi' ? '✓ Onaylandı' : st === 'iptal' ? '✗ İptal' : '⏳ Bekliyor';
+                    return `
+                    <div class="border-l-4 ${cardClass} p-4 rounded-lg">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <p class="font-bold text-lg">${apt.HastaAdi}</p>
+                                    <span class="px-2 py-1 rounded-full text-xs ${badgeClass}">${label}</span>
+                                </div>
+                                <p class="text-gray-700">
+                                    <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    ${formatDate(apt.Tarih)} - ${apt.Saat}
+                                </p>
+                                ${apt.Hizmet ? `<p class="text-sm text-gray-600">Hizmet: ${apt.Hizmet}</p>` : ''}
+                            </div>
+                            ${st === 'bekliyor' ? `
+                                <div class="flex gap-2">
+                                    <button onclick="updateStatus('${apt.ID}', 'onaylandi')" 
+                                        class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">
+                                        ✓ Onayla
+                                    </button>
+                                    <button onclick="updateStatus('${apt.ID}', 'iptal')" 
+                                        class="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700">
+                                        ✗ İptal
+                                    </button>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>`;}).join('');
+            } catch (error) {
+                console.error('Randevular yüklenemedi:', error);
+                document.getElementById('appointmentsList').innerHTML = 
+                    '<p class="text-red-500 text-center py-4">Randevular yüklenirken hata oluştu</p>';
+            }
+        }
+
+        // İstatistikleri güncelle
+        function updateStats(appointments) {
+            const norms = appointments.map(a => normalizeStatus(a.Durum));
+            document.getElementById('totalCount').textContent = norms.length;
+            document.getElementById('pendingCount').textContent = norms.filter(s => s === 'bekliyor').length;
+            document.getElementById('confirmedCount').textContent = norms.filter(s => s === 'onaylandi').length;
+        }
+
+        // Randevu durumu güncelle
+        async function updateStatus(id, durum) {
+            try {
+                // POST + query param kullan (CORS preflight yok)
+                const response = await fetch(`${API_BASE}/update-appointment?id=${encodeURIComponent(id)}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ durum, doktorId: currentUser.id })
+                });
+                
+                if (!response.ok) {
+                    const errText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errText}`);
+                }
+                
+                const result = await response.json().catch(() => ({}));
+                
+                // Backend success:true veya id döndüyse başarılı
+                if (result.success || result.id || response.status === 200) {
+                    loadAppointments();
+                } else if (result.error) {
+                    alert(result.error);
+                } else {
+                    // Sessizce başarılı say (HTTP 200 geldi)
+                    loadAppointments();
+                }
+            } catch (error) {
+                console.error('Güncelleme hatası:', error);
+                alert('Randevu durumu güncellenemedi!');
+            }
+        }
+
+        // Tarih formatlama
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('tr-TR', { day: '2-digit', month: 'long', year: 'numeric' });
+        }
+
+        // Tab Geçişleri
+        function showTab(tabName) {
+            // Tüm tab butonlarını pasif yap
+            document.querySelectorAll('[id^="tab"]').forEach(btn => {
+                btn.classList.remove('border-green-600', 'text-green-600');
+                btn.classList.add('text-gray-500');
+            });
+            
+            // Tüm tab içeriklerini gizle
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // Seçili tabı aktif yap
+            const activeBtn = document.getElementById('tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1));
+            if (activeBtn) {
+                activeBtn.classList.add('border-green-600', 'text-green-600');
+                activeBtn.classList.remove('text-gray-500');
+            }
+            
+            // Seçili tab içeriğini göster
+            const activeContent = document.getElementById(tabName + 'Tab');
+            if (activeContent) {
+                activeContent.classList.remove('hidden');
+            }
+
+            // Tab açıldığında ilgili verileri yükle
+            if (tabName === 'availability') loadMyAvailabilities();
+        }
+
+        // Müsaitlik Yönetimi
+        async function loadMyAvailabilities() {
+            if (!currentUser) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/get-availabilities?doktorId=${currentUser.id}`);
+                const availabilities = await response.json();
+                const list = document.getElementById('myAvailabilitiesList');
+                
+                if (availabilities.length === 0) {
+                    list.innerHTML = '<p class="text-gray-500 text-center py-4">Henüz müsaitlik eklenmemiş</p>';
+                    return;
+                }
+
+                // Tarihe göre sırala
+                availabilities.sort((a, b) => new Date(a.Tarih) - new Date(b.Tarih));
+
+                list.innerHTML = availabilities.map(av => `
+                    <div class="flex justify-between items-center bg-white border p-3 rounded">
+                        <div>
+                            <p class="font-semibold">${formatDate(av.Tarih)}</p>
+                            <p class="text-sm text-gray-600">${av.BaslangicSaati} - ${av.BitisSaati}</p>
+                            <p class="text-xs ${av.Musait ? 'text-green-600' : 'text-red-600'}">
+                                ${av.Musait ? '✓ Müsait' : '✗ Dolu'}
+                            </p>
+                        </div>
+                        <button class="px-3 py-1 rounded bg-red-600 text-white" onclick="deleteMyAvailability('${av.ID}')">Sil</button>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Müsaitlikler yüklenemedi:', error);
+            }
+        }
+
+        async function addAvailability() {
+            if (!currentUser) return;
+            
+            const tarih = document.getElementById('avTarih').value;
+            const baslangic = document.getElementById('avBaslangic').value;
+            const bitis = document.getElementById('avBitis').value;
+            const msg = document.getElementById('availabilityAddMsg');
+
+            if (!tarih || !baslangic || !bitis) {
+                msg.innerHTML = '<span class="text-red-600">Tüm alanlar gerekli</span>';
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/add-availability`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        doktorId: currentUser.id,
+                        doktorAdi: `${currentUser.isim} ${currentUser.soyisim}`,
+                        tarih,
+                        baslangicSaati: baslangic,
+                        bitisSaati: bitis
+                    })
+                });
+                const out = await res.json();
+                msg.innerHTML = out.success ? '<span class="text-green-600">✓ Eklendi</span>' : '<span class="text-red-600">✗ Hata</span>';
+                
+                if (out.success) {
+                    document.getElementById('avTarih').value = '';
+                    document.getElementById('avBaslangic').value = '';
+                    document.getElementById('avBitis').value = '';
+                    loadMyAvailabilities();
+                }
+            } catch (e) {
+                msg.innerHTML = '<span class="text-red-600">✗ Sunucu hatası</span>';
+            }
+        }
+
+        async function deleteMyAvailability(id) {
+            if (!confirm('Bu müsaitliği silmek istediğinizden emin misiniz?')) return;
+            
+            try {
+                const res = await fetch(`${API_BASE}/delete-availability?id=${encodeURIComponent(id)}`, {
+                    method: 'DELETE'
+                });
+                const out = await res.json().catch(() => ({ success: false }));
+                if (out.success) {
+                    loadMyAvailabilities();
+                } else {
+                    alert('Silme başarısız');
+                }
+            } catch (e) {
+                alert('Hata oluştu');
+            }
+        }
+
+        // Otomatik yenileme (her 5 saniye)
+        setInterval(() => {
+            if (currentUser) {
+                loadAppointments();
+            }
+        }, 5000);
+    </script>
+</body>
+</html>

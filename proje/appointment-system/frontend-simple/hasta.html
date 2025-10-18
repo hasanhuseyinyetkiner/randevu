@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hasta - Randevu Sistemi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <div id="app" class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Login Formu -->
+        <div id="loginSection" class="bg-white rounded-2xl shadow-2xl p-8 mb-6">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-blue-600 rounded-full mx-auto mb-4 flex items-center justify-center">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-900">Hasta Girişi</h1>
+                <p class="text-gray-600 mt-2">İsim ve soyisminizi girin</p>
+            </div>
+
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Telefon Numarası</label>
+                    <input type="tel" id="telefon" required placeholder="05XX XXX XX XX"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">İsim</label>
+                    <input type="text" id="isim" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Soyisim</label>
+                    <input type="text" id="soyisim" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
+                    Giriş Yap
+                </button>
+            </form>
+
+            <div id="loginError" class="mt-4 text-red-600 text-sm text-center hidden"></div>
+            
+            <div class="mt-6 text-center">
+                <p class="text-gray-600 mb-2">Hesabınız yok mu?</p>
+                <button onclick="showRegister()" class="text-blue-600 hover:underline">Kayıt Ol</button>
+            </div>
+        </div>
+
+        <!-- Kayıt Formu -->
+        <div id="registerSection" class="bg-white rounded-2xl shadow-2xl p-8 mb-6 hidden">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Yeni Hasta Kaydı</h2>
+            
+            <form id="registerForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Telefon Numarası</label>
+                    <input type="tel" id="regTelefon" required placeholder="05XX XXX XX XX" class="w-full px-4 py-3 border rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">İsim</label>
+                    <input type="text" id="regIsim" required class="w-full px-4 py-3 border rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Soyisim</label>
+                    <input type="text" id="regSoyisim" required class="w-full px-4 py-3 border rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Doktor Seçin</label>
+                    <select id="doktorSelect" required class="w-full px-4 py-3 border rounded-lg">
+                        <option value="">Doktor seçin...</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700">
+                    Kayıt Ol
+                </button>
+            </form>
+
+            <div id="registerResult" class="mt-4 text-sm text-center"></div>
+            
+            <div class="mt-4 text-center">
+                <button onclick="showLogin()" class="text-blue-600 hover:underline">Giriş sayfasına dön</button>
+            </div>
+        </div>
+
+        <!-- Ana Sayfa (Login sonrası) -->
+        <div id="mainSection" class="hidden">
+            <div class="bg-white rounded-2xl shadow-xl p-8 mb-6">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900" id="userName"></h1>
+                        <p class="text-gray-600">Randevularınız</p>
+                    </div>
+                    <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
+                        Çıkış
+                    </button>
+                </div>
+
+                <!-- Randevu Alma -->
+                <div class="border-t pt-6 mb-6">
+                    <h2 class="text-xl font-bold mb-4">Yeni Randevu Al</h2>
+                    <form id="appointmentForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Hizmet/İşlem Seçin</label>
+                            <select id="hizmetSelect" required class="w-full px-3 py-2 border rounded-lg">
+                                <option value="">Hizmet seçin...</option>
+                            </select>
+                            <p id="hizmetSuresi" class="text-xs text-gray-500 mt-1"></p>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Tarih</label>
+                                <input type="date" id="tarih" required class="w-full px-3 py-2 border rounded-lg">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Müsait Saatler</label>
+                                <select id="saatSelect" required class="w-full px-3 py-2 border rounded-lg">
+                                    <option value="">Önce tarih seçin</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700">
+                            Randevu Oluştur
+                        </button>
+                    </form>
+                    <div id="appointmentResult" class="mt-4 text-sm"></div>
+                </div>
+
+                <!-- Randevularım -->
+                <div class="border-t pt-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold">Randevularım</h2>
+                        <button onclick="loadAppointments()" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm">
+                            Yenile
+                        </button>
+                    </div>
+                    <div id="appointmentsList" class="space-y-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // N8N API devre dışı - Gelikte kullanılacak
+        // const API_BASE = 'http://localhost:5678/webhook';
+        let currentUser = null;
+        
+        // MOCK DATA - Test amaçlı
+        const MOCK_MODE = true; // false yaparak API'yi aktifleştirebilirsiniz
+
+        // Sayfa geçişleri
+        function showLogin() {
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('registerSection').classList.add('hidden');
+        }
+
+        function showRegister() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('registerSection').classList.remove('hidden');
+            loadDoctors();
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('mainSection').classList.add('hidden');
+            document.getElementById('loginSection').classList.remove('hidden');
+        }
+
+        // Doktorları yükle
+        async function loadDoctors() {
+            if (MOCK_MODE) {
+                // Mock data
+                const select = document.getElementById('doktorSelect');
+                select.innerHTML = '<option value="">Doktor seçin...</option>';
+                select.innerHTML += '<option value="1">Dr. Ahmet Yılmaz</option>';
+                select.innerHTML += '<option value="2">Dr. Mehmet Öz</option>';
+                return;
+            }
+            // API devre dışı
+            console.log('API bağlantısı devre dışı');
+        }
+
+        // Login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const telefon = document.getElementById('telefon').value;
+            const isim = document.getElementById('isim').value;
+            const soyisim = document.getElementById('soyisim').value;
+            
+            if (MOCK_MODE) {
+                // Mock login
+                currentUser = {
+                    id: '1',
+                    telefon: telefon,
+                    isim: isim,
+                    soyisim: soyisim,
+                    rol: 'hasta',
+                    doktorId: '1'
+                };
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('mainSection').classList.remove('hidden');
+                document.getElementById('userName').textContent = `${currentUser.isim} ${currentUser.soyisim}`;
+                loadServices();
+                loadAppointments();
+                return;
+            }
+            
+            // API devre dışı
+            document.getElementById('loginError').classList.remove('hidden');
+            document.getElementById('loginError').textContent = 'API bağlantısı devre dışı';
+        });
+
+        // Kayıt
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (MOCK_MODE) {
+                document.getElementById('registerResult').innerHTML = '<span class="text-green-600">✓ Kayıt başarılı! (Mock mode - Gerçek kayıt yapılmadı)</span>';
+                setTimeout(showLogin, 2000);
+                return;
+            }
+            
+            // API devre dışı
+            document.getElementById('registerResult').innerHTML = '<span class="text-red-600">✗ API bağlantısı devre dışı</span>';
+        });
+
+        // Hizmetleri yükle
+        async function loadServices() {
+            if (MOCK_MODE) {
+                const select = document.getElementById('hizmetSelect');
+                select.innerHTML = '<option value="">Hizmet seçin...</option>';
+                select.innerHTML += '<option value="1" data-duration="30">Dolgu (30 dk)</option>';
+                select.innerHTML += '<option value="2" data-duration="45">Diş Temizliği (45 dk)</option>';
+                return;
+            }
+            // API devre dışı
+            console.log('API bağlantısı devre dışı');
+        }
+
+        // Hizmet seçildiğinde süreyi göster
+        document.addEventListener('DOMContentLoaded', () => {
+            const hizmetSelect = document.getElementById('hizmetSelect');
+            if (hizmetSelect) {
+                hizmetSelect.addEventListener('change', (e) => {
+                    const selected = e.target.selectedOptions[0];
+                    const duration = selected?.dataset?.duration;
+                    const suresiEl = document.getElementById('hizmetSuresi');
+                    if (duration && suresiEl) {
+                        suresiEl.textContent = `Bu işlem yaklaşık ${duration} dakika sürer`;
+                    } else if (suresiEl) {
+                        suresiEl.textContent = '';
+                    }
+                });
+            }
+        });
+
+        // Tarih değiştiğinde müsait saatleri getir
+        document.addEventListener('DOMContentLoaded', () => {
+            const tarihInput = document.getElementById('tarih');
+            if (tarihInput) {
+                tarihInput.addEventListener('change', async () => {
+                    const tarih = tarihInput.value;
+                    if (!currentUser || !tarih) return;
+                    
+                    const saatSelect = document.getElementById('saatSelect');
+                    
+                    if (MOCK_MODE) {
+                        // Mock saatler
+                        saatSelect.innerHTML = '<option value="">Saat seçin</option>';
+                        saatSelect.innerHTML += '<option value="09:00">09:00</option>';
+                        saatSelect.innerHTML += '<option value="10:00">10:00</option>';
+                        saatSelect.innerHTML += '<option value="11:00">11:00</option>';
+                        saatSelect.innerHTML += '<option value="14:00">14:00</option>';
+                        saatSelect.innerHTML += '<option value="15:00">15:00</option>';
+                        return;
+                    }
+                    
+                    // API devre dışı
+                    saatSelect.innerHTML = '<option value="">API devre dışı</option>';
+                });
+            }
+        });
+
+        // Randevu oluştur
+        if (document.getElementById('appointmentForm')) {
+            document.getElementById('appointmentForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const hizmetSelect = document.getElementById('hizmetSelect');
+                const selectedOption = hizmetSelect.selectedOptions[0];
+                
+                const appointment = {
+                    hastaId: currentUser.id,
+                    hastaAdi: `${currentUser.isim} ${currentUser.soyisim}`,
+                    doktorId: currentUser.doktorId,
+                    doktorAdi: "Doktor",
+                    hizmetId: hizmetSelect.value,
+                    hizmet: selectedOption.text,
+                    tarih: document.getElementById('tarih').value,
+                    saat: document.getElementById('saatSelect').value
+                };
+
+                if (MOCK_MODE) {
+                    document.getElementById('appointmentResult').innerHTML = '<span class="text-green-600">✓ Randevu oluşturuldu! (Mock mode)</span>';
+                    e.target.reset();
+                    setTimeout(loadAppointments, 1000);
+                    return;
+                }
+                
+                // API devre dışı
+                document.getElementById('appointmentResult').innerHTML = '<span class="text-red-600">✗ API bağlantısı devre dışı</span>';
+            });
+        }
+
+        // Randevuları yükle
+        async function loadAppointments() {
+            const list = document.getElementById('appointmentsList');
+            
+            if (MOCK_MODE) {
+                // Mock randevular
+                const appointments = [
+                    { ID: '1', Tarih: '2025-01-25', Saat: '10:00', DoktorAdi: 'Dr. Ahmet Yılmaz', Hizmet: 'Dolgu', Durum: 'onaylandi' },
+                    { ID: '2', Tarih: '2025-01-26', Saat: '14:00', DoktorAdi: 'Dr. Mehmet Öz', Hizmet: 'Diş Temizliği', Durum: 'bekliyor' }
+                ];
+                
+                if (appointments.length === 0) {
+                    list.innerHTML = '<p class="text-gray-500 text-center py-4">Henüz randevunuz yok (Mock mode)</p>';
+                    return;
+                }
+
+                list.innerHTML = appointments.map(apt => `
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <p class="font-semibold">${apt.Tarih} - ${apt.Saat}</p>
+                                <p class="text-sm text-gray-600">${apt.DoktorAdi}</p>
+                                ${apt.Hizmet ? `<p class="text-xs text-gray-500">Hizmet: ${apt.Hizmet}</p>` : ''}
+                            </div>
+                            <div class="flex gap-2 items-center">
+                                <span class="px-3 py-1 rounded-full text-sm ${
+                                    apt.Durum === 'onaylandi' ? 'bg-green-100 text-green-800' : 
+                                    apt.Durum === 'iptal' ? 'bg-red-100 text-red-800' :
+                                    'bg-yellow-100 text-yellow-800'
+                                }">
+                                    ${apt.Durum === 'onaylandi' ? '✓ Onaylandı' : apt.Durum === 'iptal' ? '✗ İptal' : '⏳ Bekliyor'}
+                                </span>
+                                ${apt.Durum !== 'iptal' ? `
+                                    <button onclick="cancelAppointment('${apt.ID}')" 
+                                        class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">
+                                        İptal Et
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                return;
+            }
+            
+            // API devre dışı
+            list.innerHTML = '<p class="text-gray-500 text-center py-4">API bağlantısı devre dışı</p>';
+        }
+
+        // Randevu iptal et
+        async function cancelAppointment(id) {
+            if (!confirm('Bu randevuyu iptal etmek istediğinizden emin misiniz?')) return;
+            
+            if (MOCK_MODE) {
+                alert('✓ Randevu iptal edildi (Mock mode)');
+                loadAppointments();
+                return;
+            }
+            
+            // API devre dışı
+            alert('✗ API bağlantısı devre dışı');
+        }
+
+        // Otomatik yenileme (her 5 saniye)
+        setInterval(() => {
+            if (currentUser) {
+                loadAppointments();
+            }
+        }, 5000);
+    </script>
+</body>
+</html>

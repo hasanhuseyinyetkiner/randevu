@@ -1,0 +1,61 @@
+Elbette, sağlanan ses kaydının detaylı bir analizini aşağıda bulabilirsiniz. Ses kaydı, Alperen isimli bir kişi tarafından Hüseyin'e hitaben kaydedilmiş bir proje özetidir. Konu, müşterilerinin ihtiyaçları doğrultusunda geliştirilmesi istenen özel bir takvim ve randevu otomasyonu sistemidir.
+
+### Projenin Ana Hedefi ve Gerekçesi
+
+Ses kaydının temel amacı, mevcut randevu sistemlerinin (Google Takvim, Calendly vb.) getirdiği bir zorunluluğu ortadan kaldırmaktır. Mevcut sistemler randevu oluşturmak için kullanıcıdan bir e-posta adresi talep etmektedir. Ancak, projenin hedef kitlesi olan müşterilerin son kullanıcıları genellikle yaşça büyük bireylerden oluştuğu için, bu kişilerin e-posta adresleri bulunmamakta veya e-posta kullanmayı tercih etmemektedirler. Bu nedenle, e-posta zorunluluğunu tamamen ortadan kaldıran ve bunun yerine telefon numarası odaklı çalışan, özelleştirilmiş bir randevu sistemi geliştirilmesi talep edilmektedir.
+
+---
+
+### Sistemin Teknik ve Fonksiyonel Gereksinimleri
+
+Alperen, geliştirilecek sistemin sahip olması gereken özellikleri maddeler halinde detaylandırmıştır:
+
+*1. Basitleştirilmiş Veri Girişi:*
+* Randevu alacak kişiden sadece iki bilgi istenecektir:
+    * *Ad Soyad:* Tek bir metin kutusu (text box) içinde alınabilir.
+    * *Telefon Numarası:* Sistemin temelini oluşturacak olan anahtar bilgidir.
+* Kullanıcıdan kesinlikle e-posta adresi istenmeyecektir.
+
+*2. Çoklu Takvim Desteği (Multi-Calendar):*
+* Sistem, bir işletme altında çalışan birden fazla profesyoneli desteklemelidir.
+* *Örnek:* Bir diş kliniğinde çalışan 4 farklı diş hekimi için ayrı ayrı takvimler oluşturulabilmelidir.
+* Her profesyonelin (diş hekimi, tırnak sanatçısı vb.) kendi çalışma saatleri ve müsaitlik durumu kendi özel takviminde yönetilecektir. Bu sayede, bir profesyonelin dolu olduğu bir saatte, diğer bir profesyonelden randevu alınabilmesi mümkün olacaktır.
+
+*3. Esnek Randevu Süreleri:*
+* Randevu aralıkları sabit olmamalı, yönetici tarafından ayarlanabilir olmalıdır.
+* Sistem, 30 dakika, 45 dakika, 1 saat gibi farklı sürelerde randevu oluşturulmasına izin vermelidir.
+* *Gerekçe:* Farklı hizmetlerin süresi değişiklik göstermektedir. Örneğin, bir manikür işlemi 30 dakika sürerken, protez tırnak uygulaması 1 saat sürebilir. Bu nedenle, hizmete özel randevu uzunlukları tanımlanabilmelidir.
+
+*4. Birleştirilmiş (Consolidated) Takvim Görünümü:*
+* Bu, projenin en zorlayıcı olabilecek kısımlarından biri olarak belirtilmiştir.
+* İşletme sahibinin, bünyesindeki tüm çalışanların (örneğin 10-20 tırnak sanatçısının) takvimlerini tek bir ana ekranda görmesi gerekmektedir.
+* Bu "master" takvim görünümü sayesinde, yönetici hangi personelin hangi saatte dolu veya boş olduğunu anlık olarak takip edebilmelidir.
+
+*5. Mevcut Dashboard Entegrasyonu:*
+* Geliştirici ekibin halihazırda kullandığı bir iç yönetim paneli (dashboard) bulunmaktadır.
+* Yeni geliştirilecek olan bu takvim modülü, mevcut dashboard'a bir eklenti veya modül olarak entegre ("enjekte") edilecektir.
+* İlk aşamada sistem, bu iç panel üzerinden test edilecek ve kullanılacaktır.
+
+*6. Benzersiz Randevu Linkleri Oluşturma:*
+* Dashboard üzerinden oluşturulan her bir profesyonel takvimi için sistem, otomatik olarak benzersiz bir web linki (URL) üretecektir.
+* Bu linkler, müşterilere doğrudan gönderilmek üzere tasarlanmıştır. Örneğin, "Ayşe Hanım'dan randevu almak için bu linke tıklayın" şeklinde bir mesajla birlikte bu linkler WhatsApp üzerinden son kullanıcıya iletilecektir.
+
+*7. WhatsApp Entegrasyonu (Esnek Yaklaşım):*
+* Randevu oluşturulduğunda müşteriye onay ve hatırlatma mesajlarının gönderilmesi için WhatsApp entegrasyonu gerekmektedir.
+* Bu konuda Hüseyin'e iki seçenek sunulmaktadır:
+    * *Seçenek A:* Eğer Hüseyin bu entegrasyonu sorunsuz bir şekilde yapabileceğine inanıyorsa, sorumluluğu tamamen üstlenebilir.
+    * *Seçenek B:* Eğer bu entegrasyonun proje için bir risk veya zaman kaybı oluşturacağını düşünüyorsa, bu adımı atlayabilir. Bu durumda, randevu verilerini (ad, soyad, telefon, tarih, saat vb.) bir veritabanına veya bir "sheet"e (Google Sheets gibi bir e-tablo hizmeti) kaydetmesi yeterli olacaktır. Veriler kaydedildikten sonra, Alperen'in ekibi bu verileri alıp WhatsApp gönderimlerini kendi taraflarında halledecektir.
+
+---
+
+### Proje Akışı ve İş Planı
+
+1.  *Geliştirme:* Hüseyin, yukarıdaki gereksinimlere uygun olarak takvim sistemini geliştirecektir.
+2.  *Entegrasyon:* Geliştirilen modül, mevcut iç yönetim paneline entegre edilecektir.
+3.  *İç Test:* Sistem ilk olarak ekip içinde kullanılacak ve test edilecektir.
+4.  *Müşteri Uygulaması:* Sistem stabil hale geldikten sonra, diş hekimi ve güzellik merkezi gibi müşteriler için dashboard'lar oluşturulacak ve takvim özelliği bu panellere eklenecektir.
+5.  *Son Kullanıcıya Ulaşım:* Müşteriler, kendi panellerinden çalışanları için takvimler oluşturacak ve oluşan benzersiz linkleri WhatsApp aracılığıyla kendi müşterilerine göndererek randevu almalarını sağlayacaklardır.
+
+### Sonuç
+
+Ses kaydı, net ve iyi tanımlanmış bir proje talebidir. Teknik gereksinimler, iş mantığı ve potansiyel zorluklar açıkça ifade edilmiştir. Özellikle WhatsApp entegrasyonu konusunda geliştiriciye esneklik tanınması, projenin daha yönetilebilir ve modüler bir yaklaşımla ele alınmasını sağlamaktadır. Alperen, konuşmanın sonunda Hüseyin'e "Tekrardan hoş geldin, hayırlı uğurlu olsun" diyerek, bu projenin Hüseyin için yeni bir başlangıç olduğunu ima etmektedir.

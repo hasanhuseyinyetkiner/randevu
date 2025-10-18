@@ -1,0 +1,98 @@
+{
+    "inputs": [
+        {
+            "id": "imagesorcery_binary",
+            "type": "promptString",
+            "description": "Path to the 'imagesorcery-mcp' executable (or just 'imagesorcery-mcp' if it's in PATH). On Windows: imagesorcery-mcp.exe",
+            "password": false
+        },
+        {
+            "id": "browser_url",
+            "type": "promptString",
+            "description": "Optional: connect to an already-running Chrome (remote debugging / port-forward). Example: http://127.0.0.1:9222",
+            "password": false
+        },
+        {
+            "id": "headless",
+            "type": "promptString",
+            "description": "Run Chrome headless (true/false). Default: false",
+            "password": false,
+            "default": "false"
+        },
+        {
+            "id": "isolated",
+            "type": "promptString",
+            "description": "Use a temporary user-data-dir (true/false). Default: false",
+            "password": false,
+            "default": "false"
+        },
+        {
+            "id": "chrome_channel",
+            "type": "promptString",
+            "description": "Chrome channel: stable | canary | beta | dev (default: stable).",
+            "password": false,
+            "default": "stable"
+        }
+    ],
+    "mcpServers": {
+        "upstash/context7": {
+            "serverUrl": "https://mcp.context7.com/mcp"
+        },
+        "local-memory": {
+            "command": "python3",
+            "args": [
+                "/home/hasanyetkiner/y/simple_memory_server.py"
+            ]
+        },
+        "oraios/serena": {
+            "command": "uvx",
+            "args": [
+                "--from",
+                "git+https://github.com/oraios/serena",
+                "serena",
+                "start-mcp-server",
+                "serena==latest",
+                "--context",
+                "ide-assistant"
+            ]
+        },
+        "jlia0-servers": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@smithery/cli@latest",
+                "run",
+                "@jlia0/servers",
+                "--key",
+                "504fca86-2833-4b17-9d46-1ef41db93b87",
+                "--profile",
+                "sure-slug-KJV5H4"
+            ]
+        },
+        "mcp-taskmanager": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@smithery/cli@latest",
+                "run",
+                "@kazuph/mcp-taskmanager",
+                "--key",
+                "da82a51f-c0eb-466d-8fc8-98443d9fd10c"
+            ]
+        },
+        "chromedevtools/chrome-devtools-mcp": {
+            "command": "npx",
+            "args": [
+                "chrome-devtools-mcp@latest",
+                "--browserUrl",
+                "${input:browser_url}",
+                "--headless",
+                "${input:headless}",
+                "--isolated",
+                "${input:isolated}",
+                "--channel",
+                "${input:chrome_channel}"
+            ]
+        }
+    }
+}

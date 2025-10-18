@@ -1,0 +1,94 @@
+=== SHEET 1: Kullanicilar ===
+BAŞLIKLAR (A1:G1):
+ID	Isim	Soyisim	Rol	Telefon	KayitTarihi	Aktif
+
+ÖRNEK VERİLER (A2:G5):
+1	Admin	Kullanıcı	admin	5551234567	01/17/2025	TRUE
+2	Ahmet	Yılmaz	doktor	5551234568	01/17/2025	TRUE
+3	Ayşe	Demir	hasta	5551234569	01/17/2025	TRUE
+4	Mehmet	Öz	doktor	5551234570	01/17/2025	TRUE
+
+=== SHEET 2: Hizmetler ===
+BAŞLIKLAR (A1:E1):
+ID	Isim	Sure	DepartmanID	OlusturmaTarihi
+
+ÖRNEK VERİLER (A2:E7):
+1	Dolgu	30	1	01/17/2025
+2	Diş Temizliği	45	1	01/17/2025
+3	İmplant	60	2	01/17/2025
+4	Kanal Tedavisi	90	1	01/17/2025
+5	Protez	120	2	01/17/2025
+6	Ortodonti Kontrol	30	3	01/17/2025
+
+=== SHEET 3: Departmanlar ===
+BAŞLIKLAR (A1:D1):
+ID	Isim	Aciklama	Aktif
+
+ÖRNEK VERİLER (A2:D5):
+1	Genel Diş Hekimliği	Dolgu, temizlik, kanal tedavisi	TRUE
+2	Cerrahi	İmplant, çekim, protez	TRUE
+3	Ortodonti	Tel tedavisi, plak	TRUE
+4	Pedodonti	Çocuk diş hekimliği	TRUE
+
+=== SHEET 4: DoktorHizmetler ===
+BAŞLIKLAR (A1:D1):
+ID	DoktorID	HizmetID	OlusturmaTarihi
+
+ÖRNEK VERİLER (A2:D8):
+1	2	1	01/17/2025
+2	2	2	01/17/2025
+3	2	4	01/17/2025
+4	4	3	01/17/2025
+5	4	5	01/17/2025
+6	4	1	01/17/2025
+7	4	2	01/17/2025
+
+=== SHEET 5: Musaitlikler ===
+BAŞLIKLAR (A1:H1):
+ID	DoktorID	DoktorAdi	Tarih	BaslangicSaati	BitisSaati	Musait	OlusturulmaTarihi
+
+ÖRNEK VERİLER (A2:H5):
+1	2	Ahmet Yılmaz	2025-01-20	09:00	17:00	TRUE	01/17/2025
+2	2	Ahmet Yılmaz	2025-01-21	09:00	17:00	TRUE	01/17/2025
+3	4	Mehmet Öz	2025-01-20	10:00	18:00	TRUE	01/17/2025
+4	4	Mehmet Öz	2025-01-22	09:00	15:00	TRUE	01/17/2025
+
+=== SHEET 6: Randevular ===
+BAŞLIKLAR (A1:L1):
+ID	HastaID	HastaAdi	DoktorID	DoktorAdi	HizmetID	Hizmet	Tarih	Saat	Durum	OlusturmaTarihi	IptalNedeni
+
+ÖRNEK VERİLER (A2:L4):
+1760546074666	3	Ayşe Demir	2	Ahmet Yılmaz	1	Dolgu (30 dk)	2025-01-20	10:00	bekliyor	2025-01-17T10:00:00.000Z	
+1760546074667	3	Ayşe Demir	4	Mehmet Öz	3	İmplant (60 dk)	2025-01-22	14:00	onaylandi	2025-01-17T10:30:00.000Z	
+1760546074668	3	Ayşe Demir	2	Ahmet Yılmaz	2	Diş Temizliği (45 dk)	2025-01-25	09:00	iptal	2025-01-17T11:00:00.000Z	Hasta isteği
+
+=== SHEET 7: RandevuLinkleri ===
+BAŞLIKLAR (A1:H1):
+ID	DoktorID	DoktorAdi	LinkKodu	IzinVerilenHizmetler	Aktif	OlusturmaTarihi	SonKullanimTarihi
+
+ÖRNEK VERİLER (A2:H4):
+1	2	Ahmet Yılmaz	ahmet-yilmaz-2025	1,2,4	TRUE	01/17/2025	12/31/2025
+2	4	Mehmet Öz	mehmet-oz-implant	3,5	TRUE	01/17/2025	12/31/2025
+3	2	Ahmet Yılmaz	ahmet-acil	1,2	TRUE	01/17/2025	03/31/2025
+
+=== SHEET 8: Ayarlar ===
+BAŞLIKLAR (A1:C1):
+Anahtar	Deger	Aciklama
+
+ÖRNEK VERİLER (A2:C11):
+randevu_aralik	30	Randevu aralığı (dakika)
+max_ayni_saat_randevu	3	Aynı saatte maksimum randevu sayısı
+calisma_baslangic	09:00	Genel çalışma başlangıç saati
+calisma_bitis	18:00	Genel çalışma bitiş saati
+ogle_arasi_baslangic	12:00	Öğle arası başlangıç
+ogle_arasi_bitis	13:00	Öğle arası bitiş
+randevu_iptal_suresi	24	Randevu iptali için minimum saat
+gelecek_gun_limiti	90	Kaç gün sonrasına randevu alınabilir
+sms_bildirimi	TRUE	SMS bildirimi aktif mi
+email_bildirimi	FALSE	Email bildirimi aktif mi
+
+=== NOTLAR ===
+- Her satır TAB ile ayrılmış
+- Doğrudan Google Sheets'e kopyala-yapıştır yapabilirsiniz
+- Sütun başlıklarını TAM OLARAK kopyalayın (büyük/küçük harf önemli!)
+- Türkçe karakterlere dikkat edin (ı, ş, ğ, ü, ö, ç)

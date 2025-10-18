@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-purple-50 to-pink-100 min-h-screen">
+    <div id="app" class="container mx-auto px-4 py-8 max-w-6xl">
+        <div id="loginSection" class="bg-white rounded-2xl shadow-2xl p-8 max-w-md mx-auto">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold">Admin Girişi</h1>
+            </div>
+            <form id="loginForm" class="space-y-4">
+                <input type="text" id="isim" placeholder="İsim" required class="w-full px-4 py-3 border rounded-lg">
+                <input type="text" id="soyisim" placeholder="Soyisim" required class="w-full px-4 py-3 border rounded-lg">
+                <input type="password" id="sifre" placeholder="Şifre" required class="w-full px-4 py-3 border rounded-lg">
+                <button type="submit" class="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700">Giriş</button>
+            </form>
+            <div id="loginError" class="mt-4 text-red-600 text-sm text-center hidden"></div>
+        </div>
+
+        <div id="mainSection" class="hidden">
+            <div class="bg-white rounded-2xl shadow-xl p-8">
+                <div class="flex justify-between mb-6">
+                    <h1 class="text-3xl font-bold" id="userName"></h1>
+                    <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg">Çıkış</button>
+                </div>
+
+                <!-- Tab Menüsü -->
+                <div class="flex border-b mb-6">
+                    <button onclick="showTab('users')" id="tabUsers" class="px-6 py-3 font-semibold border-b-2 border-purple-600 text-purple-600">Kullanıcılar</button>
+                    <button onclick="showTab('services')" id="tabServices" class="px-6 py-3 font-semibold text-gray-500 hover:text-gray-700">Hizmetler</button>
+                    <button onclick="showTab('availability')" id="tabAvailability" class="px-6 py-3 font-semibold text-gray-500 hover:text-gray-700">Doktor Müsaitlik</button>
+                    <button onclick="showTab('calendar')" id="tabCalendar" class="px-6 py-3 font-semibold text-gray-500 hover:text-gray-700">Takvim</button>
+                </div>
+
+                <!-- Kullanıcı Yönetimi -->
+                <div id="usersTab" class="tab-content">
+                    <h2 class="text-2xl font-bold mb-4">Kullanıcı Yönetimi</h2>
+
+                    <!-- Ekle -->
+                    <div id="userAdd" class="bg-gray-50 p-4 rounded-lg mb-4">
+                        <h3 class="font-semibold mb-2">Yeni Kullanıcı Ekle</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-6 gap-3 items-end">
+                            <select id="uRole" class="px-3 py-2 border rounded" onchange="togglePasswordField()">
+                                <option value="doktor">Doktor</option>
+                                <option value="hasta">Hasta</option>
+                            </select>
+                            <input id="uIsim" placeholder="İsim" class="px-3 py-2 border rounded"/>
+                            <input id="uSoyisim" placeholder="Soyisim" class="px-3 py-2 border rounded"/>
+                            <input id="uTelefon" type="tel" placeholder="Telefon (sadece rakam)" pattern="[0-9]*" class="px-3 py-2 border rounded"/>
+                            <input id="uSifre" placeholder="Şifre" class="px-3 py-2 border rounded"/>
+                            <button class="bg-green-600 text-white py-2 rounded" onclick="addUser()">+ Ekle</button>
+                        </div>
+                        <div id="userAddMsg" class="text-sm mt-2"></div>
+                    </div>
+
+                    <!-- Liste -->
+                    <div class="mt-6">
+                        <div class="flex items-end justify-between mb-3">
+                            <h3 class="text-xl font-semibold">Var Olan Kullanıcılar</h3>
+                            <div class="flex gap-2 items-center">
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Rol Filtresi</label>
+                                    <select id="filterRole" class="px-3 py-2 border rounded">
+                                        <option value="">Tümü</option>
+                                        <option value="doktor">Doktorlar</option>
+                                        <option value="hasta">Hastalar</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">İsim Ara</label>
+                                    <input id="searchUser" class="px-3 py-2 border rounded" placeholder="İsim veya soyisim yazın...">
+                                </div>
+                                <div class="flex items-end">
+                                    <button class="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white border rounded" onclick="loadUsers()">🔄 Yenile</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="usersList" class="space-y-2"></div>
+                    </div>
+                </div>
+
+                <!-- Hizmet Yönetimi -->
+                <div id="servicesTab" class="tab-content hidden">
+                    <h2 class="text-2xl font-bold mb-4">Hizmet Yönetimi</h2>
+                    
+                    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                        <h3 class="font-semibold mb-2">Yeni Hizmet Ekle</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+                            <input id="hizmetIsim" placeholder="Hizmet Adı (ör: Dolgu)" class="px-3 py-2 border rounded"/>
+                            <input id="hizmetSure" type="number" placeholder="Süre (dakika)" class="px-3 py-2 border rounded"/>
+                            <button class="bg-green-600 text-white py-2 rounded" onclick="addService()">+ Ekle</button>
+                        </div>
+                        <div id="serviceAddMsg" class="text-sm mt-2"></div>
+                    </div>
+
+                    <div class="mt-6">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-xl font-semibold">Var Olan Hizmetler</h3>
+                            <button class="px-3 py-2 bg-gray-100 border rounded" onclick="loadServices()">Yenile</button>
+                        </div>
+                        <div id="servicesList" class="space-y-2"></div>
+                    </div>
+                </div>
+
+                <!-- Doktor Müsaitlik Yönetimi -->
+                <div id="availabilityTab" class="tab-content hidden">
+                    <h2 class="text-2xl font-bold mb-4">Doktor Müsaitlik Yönetimi</h2>
+                    
+                    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                        <h3 class="font-semibold mb-2">Müsaitlik Ekle</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
+                            <select id="avDoktorId" class="px-3 py-2 border rounded">
+                                <option value="">Doktor seçin</option>
+                            </select>
+                            <input id="avTarih" type="date" class="px-3 py-2 border rounded"/>
+                            <input id="avBaslangic" type="time" placeholder="Başlangıç" class="px-3 py-2 border rounded"/>
+                            <input id="avBitis" type="time" placeholder="Bitiş" class="px-3 py-2 border rounded"/>
+                            <button class="bg-green-600 text-white py-2 rounded" onclick="addAvailability()">+ Ekle</button>
+                        </div>
+                        <div id="availabilityAddMsg" class="text-sm mt-2"></div>
+                    </div>
+
+                    <div class="mt-6">
+                        <div class="flex items-end justify-between mb-3">
+                            <h3 class="text-xl font-semibold">Müsaitlik Durumu</h3>
+                            <div class="flex gap-2 items-center">
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Doktor Adı Ara</label>
+                                    <input id="searchAvDoktor" class="px-3 py-2 border rounded" placeholder="Doktor adı yazın...">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Tarih Ara</label>
+                                    <input id="searchAvTarih" type="date" class="px-3 py-2 border rounded">
+                                </div>
+                                <div class="flex items-end">
+                                    <button class="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white border rounded" onclick="loadAvailabilities()">🔄 Yenile</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="availabilitiesList" class="space-y-2"></div>
+                    </div>
+                </div>
+
+                <!-- Birleşik Takvim -->
+                <div id="calendarTab" class="tab-content hidden">
+                    <h2 class="text-2xl font-bold mb-4">Tüm Randevular - Birleşik Takvim</h2>
+                    
+                    <!-- Randevu Oluşturma Formu -->
+                    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                        <h3 class="font-semibold mb-2">Yeni Randevu Oluştur</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3">
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Doktor *</label>
+                                <select id="aptDoktorId" class="w-full px-3 py-2 border rounded">
+                                    <option value="">Doktor seçin</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Hasta Adı *</label>
+                                <input id="aptHastaIsim" placeholder="Ad Soyad" class="w-full px-3 py-2 border rounded"/>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Telefon *</label>
+                                <input id="aptHastaTelefon" type="tel" pattern="[0-9]*" placeholder="5XXXXXXXXX" class="w-full px-3 py-2 border rounded"/>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Hizmet</label>
+                                <select id="aptHizmetId" class="w-full px-3 py-2 border rounded">
+                                    <option value="">Hizmet seçin (opsiyonel)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Tarih *</label>
+                                <input id="aptTarih" type="date" class="w-full px-3 py-2 border rounded"/>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Saat *</label>
+                                <input id="aptSaat" type="time" class="w-full px-3 py-2 border rounded"/>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Durum</label>
+                                <select id="aptDurum" class="w-full px-3 py-2 border rounded">
+                                    <option value="onaylandı">Onaylandı</option>
+                                    <option value="beklemede">Beklemede</option>
+                                </select>
+                            </div>
+                            <button class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700" onclick="createAppointment()">➕ Randevu Oluştur</button>
+                        </div>
+                        <div id="aptCreateMsg" class="text-sm mt-2"></div>
+                    </div>
+                    
+                    <!-- Filtreleme -->
+                    <div class="mb-4 flex gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Tarih Aralığı</label>
+                            <div class="flex gap-2">
+                                <input id="calStartDate" type="date" class="px-3 py-2 border rounded"/>
+                                <span class="py-2">-</span>
+                                <input id="calEndDate" type="date" class="px-3 py-2 border rounded"/>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Doktor/Hasta Ara</label>
+                            <input id="calDoktorSearch" type="text" placeholder="Doktor veya hasta ismi yazın..." class="px-3 py-2 border rounded"/>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Durum Filtresi</label>
+                            <select id="calDurumFilter" class="px-3 py-2 border rounded">
+                                <option value="">Tüm Durumlar</option>
+                                <option value="onaylandı">Onaylandı</option>
+                                <option value="beklemede">Beklemede</option>
+                                <option value="iptal">İptal</option>
+                                <option value="tamamlandı">Tamamlandı</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="calendarView" class="border rounded-lg p-4 bg-white"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kullanıcı Düzenleme Modal -->
+        <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
+                <h3 class="text-xl font-bold mb-4">Kullanıcıyı Düzenle</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">İsim</label>
+                        <input id="editIsim" class="w-full px-3 py-2 border rounded" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Soyisim</label>
+                        <input id="editSoyisim" class="w-full px-3 py-2 border rounded" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Telefon</label>
+                        <input id="editTelefon" type="tel" pattern="[0-9]*" class="w-full px-3 py-2 border rounded" />
+                    </div>
+                    <div id="editSifreContainer">
+                        <label class="block text-sm font-medium mb-1">Şifre (boş bırak değişmez)</label>
+                        <input id="editSifre" type="password" class="w-full px-3 py-2 border rounded" />
+                    </div>
+                </div>
+                <div class="flex gap-2 mt-6">
+                    <button onclick="saveUserEdit()" class="flex-1 bg-green-600 text-white py-2 rounded hover:bg-green-700">Kaydet</button>
+                    <button onclick="closeEditModal()" class="flex-1 bg-gray-300 text-gray-800 py-2 rounded hover:bg-gray-400">İptal</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Randevu Düzenleme Modal -->
+        <div id="editAppointmentModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
+                <h3 class="text-xl font-bold mb-4">Randevuyu Düzenle</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Hasta Adı</label>
+                        <input id="editAptHastaIsim" class="w-full px-3 py-2 border rounded" readonly />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Telefon</label>
+                        <input id="editAptTelefon" class="w-full px-3 py-2 border rounded" readonly />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Doktor</label>
+                        <select id="editAptDoktorId" class="w-full px-3 py-2 border rounded">
+                            <option value="">Doktor seçin</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Hizmet</label>
+                        <select id="editAptHizmetId" class="w-full px-3 py-2 border rounded">
+                            <option value="">Hizmet seçin (opsiyonel)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Tarih</label>
+                        <input id="editAptTarih" type="date" class="w-full px-3 py-2 border rounded" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Saat</label>
+                        <input id="editAptSaat" type="time" class="w-full px-3 py-2 border rounded" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Durum</label>
+                        <select id="editAptDurum" class="w-full px-3 py-2 border rounded">
+                            <option value="onaylandı">Onaylandı</option>
+                            <option value="beklemede">Beklemede</option>
+                            <option value="iptal">İptal</option>
+                            <option value="tamamlandı">Tamamlandı</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex gap-2 mt-6">
+                    <button onclick="saveAppointmentEdit()" class="flex-1 bg-green-600 text-white py-2 rounded hover:bg-green-700">Kaydet</button>
+                    <button onclick="closeAppointmentModal()" class="flex-1 bg-gray-300 text-gray-800 py-2 rounded hover:bg-gray-400">İptal</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5678/webhook';
+        const ADMIN_TOKEN = 'Bearer admin_secret_2025_xyz123';
+        let currentUser = null;
+        let doctorsCache = [];
+        let servicesCache = [];
+        let editingUser = null;
+
+        // Tab değiştirme
+        function showTab(tab) {
+            // Tüm tab'ları gizle
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+            document.querySelectorAll('[id^="tab"]').forEach(btn => {
+                btn.classList.remove('border-purple-600', 'text-purple-600');
+                btn.classList.add('text-gray-500');
+            });
+            
+            // Seçili tab'ı göster
+            document.getElementById(tab + 'Tab').classList.remove('hidden');
+            document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('border-purple-600', 'text-purple-600');
+            document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.remove('text-gray-500');
+            
+            // Tab açıldığında ilgili verileri yükle
+            if (tab === 'services') loadServices();
+            if (tab === 'availability') loadAvailabilities();
+            if (tab === 'calendar') {
+                // İlk kez açılıyorsa tarihleri otomatik doldur
+                if (!document.getElementById('calStartDate').value) {
+                    const today = new Date();
+                    const twoWeeksLater = new Date(today);
+                    twoWeeksLater.setDate(today.getDate() + 14);
+                    
+                    document.getElementById('calStartDate').value = today.toISOString().split('T')[0];
+                    document.getElementById('calEndDate').value = twoWeeksLater.toISOString().split('T')[0];
+                }
+                loadCalendar();
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('mainSection').classList.add('hidden');
+            document.getElementById('loginSection').classList.remove('hidden');
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                console.log('Giriş yapılıyor...');
+                const response = await fetch(`${API_BASE}/check-user`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        isim: document.getElementById('isim').value,
+                        soyisim: document.getElementById('soyisim').value,
+                        sifre: document.getElementById('sifre').value
+                    })
+                });
+                
+                console.log('check-user response status:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('check-user error:', errorText);
+                    document.getElementById('loginError').classList.remove('hidden');
+                    document.getElementById('loginError').textContent = 'Sunucu hatası: ' + response.status;
+                    return;
+                }
+                
+                const data = await response.json();
+                console.log('check-user data:', data);
+                
+                if (data.success && data.user.rol === 'admin') {
+                    currentUser = data.user;
+                    document.getElementById('loginSection').classList.add('hidden');
+                    document.getElementById('mainSection').classList.remove('hidden');
+                    document.getElementById('userName').textContent = currentUser.isim + ' ' + currentUser.soyisim;
+                    
+                    console.log('Doktorlar yüklenecek...');
+                    await loadDoctors();
+                    console.log('Hizmetler yüklenecek...');
+                    await loadServicesCache();
+                    
+                    populateDoktorDropdowns();
+                    populateServiceDropdowns();
+                    document.getElementById('uRole').value = 'doktor';
+                    togglePasswordField();
+                    loadUsers();
+                    // Kullanıcılar filtre/search olayı
+                    document.getElementById('filterRole').addEventListener('change', loadUsers);
+                    document.getElementById('searchUser').addEventListener('input', () => {
+                        clearTimeout(window.__usr_t);
+                        window.__usr_t = setTimeout(loadUsers, 200);
+                    });
+                    // Müsaitlik filtre/search olayı
+                    document.getElementById('searchAvDoktor').addEventListener('input', () => {
+                        clearTimeout(window.__av_t);
+                        window.__av_t = setTimeout(loadAvailabilities, 200);
+                    });
+                    document.getElementById('searchAvTarih').addEventListener('change', loadAvailabilities);
+                    
+                    // Takvim otomatik filtreleme
+                    document.getElementById('calStartDate').addEventListener('change', loadCalendar);
+                    document.getElementById('calEndDate').addEventListener('change', loadCalendar);
+                    document.getElementById('calDoktorSearch').addEventListener('input', () => {
+                        clearTimeout(window.__cal_t);
+                        window.__cal_t = setTimeout(loadCalendar, 300);
+                    });
+                    document.getElementById('calDurumFilter').addEventListener('change', loadCalendar);
+                } else {
+                    document.getElementById('loginError').classList.remove('hidden');
+                    document.getElementById('loginError').textContent = 'Giriş başarısız!';
+                }
+            } catch (error) {
+                console.error('Giriş hatası:', error);
+                document.getElementById('loginError').classList.remove('hidden');
+                document.getElementById('loginError').textContent = 'Hata: ' + error.message;
+            }
+        });
+
+        async function loadDoctors() {
+            try {
+                console.log('loadDoctors - fetching:', `${API_BASE}/get-users?rol=doktor`);
+                const res = await fetch(`${API_BASE}/get-users?rol=doktor`);
+                console.log('loadDoctors - response status:', res.status);
+                
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    console.error('loadDoctors - HTTP error:', res.status, errorText);
+                    alert('Doktorlar yüklenirken hata: ' + res.status + ' - ' + errorText.substring(0, 100));
+                    doctorsCache = [];
+                    return;
+                }
+                
+                const doctors = await res.json();
+                console.log('loadDoctors - doctors:', doctors);
+                doctorsCache = Array.isArray(doctors) ? doctors : [];
+            } catch (e) {
+                console.error('loadDoctors exception:', e);
+                alert('Doktorlar yüklenirken hata: ' + e.message);
+                doctorsCache = [];
+            }
+        }
+
+        function populateDoktorDropdowns() {
+            const selects = [
+                document.getElementById('avDoktorId'),
+                document.getElementById('aptDoktorId'),
+                document.getElementById('editAptDoktorId')
+            ];
+            
+            selects.forEach(sel => {
+                if (sel) {
+                    sel.innerHTML = '<option value="">Doktor seçin</option>';
+                    doctorsCache.forEach(d => {
+                        const opt = document.createElement('option');
+                        opt.value = d.id;
+                        opt.textContent = `${d.isim} ${d.soyisim}`;
+                        sel.appendChild(opt);
+                    });
+                }
+            });
+        }
+
+        async function loadServicesCache() {
+            try {
+                console.log('loadServicesCache - fetching:', `${API_BASE}/get-services`);
+                const res = await fetch(`${API_BASE}/get-services`);
+                console.log('loadServicesCache - response status:', res.status);
+                
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    console.error('loadServicesCache - HTTP error:', res.status, errorText);
+                    alert('Hizmetler yüklenirken hata: ' + res.status + ' - ' + errorText.substring(0, 100));
+                    servicesCache = [];
+                    return;
+                }
+                
+                let services = await res.json();
+                console.log('loadServicesCache - services:', services);
+                if(Array.isArray(services) && services.length>0 && services[0].json){
+                    services = services.map(s=>s.json);
+                }
+                servicesCache = Array.isArray(services) ? services : [];
+            } catch (e) {
+                console.error('loadServicesCache exception:', e);
+                alert('Hizmetler yüklenirken hata: ' + e.message);
+                servicesCache = [];
+            }
+        }
+
+        function populateServiceDropdowns() {
+            const selects = [
+                document.getElementById('aptHizmetId'),
+                document.getElementById('editAptHizmetId')
+            ];
+            
+            selects.forEach(sel => {
+                if (sel) {
+                    sel.innerHTML = '<option value="">Hizmet seçin (opsiyonel)</option>';
+                    servicesCache.forEach(s => {
+                        const opt = document.createElement('option');
+                        opt.value = s.ID || s.id;
+                        opt.textContent = `${s.Isim || s.isim} (${s.Sure || s.sure} dk)`;
+                        sel.appendChild(opt);
+                    });
+                }
+            });
+        }
+
+        function togglePasswordField() {
+            const role = document.getElementById('uRole').value;
+            const sifreInput = document.getElementById('uSifre');
+            if (role === 'hasta') {
+                sifreInput.classList.add('hidden');
+                sifreInput.value = '';
+            } else {
+                sifreInput.classList.remove('hidden');
+            }
+        }
+
+        // Kullanıcı yönetimi
+        async function loadUsers(){
+            try {
+                const [res1, res2] = await Promise.all([
+                    fetch(`${API_BASE}/get-users?rol=doktor`),
+                    fetch(`${API_BASE}/get-users?rol=hasta`)
+                ]);
+                const docs = await res1.json();
+                const pats = await res2.json();
+                let users = [...(Array.isArray(docs)?docs:[]), ...(Array.isArray(pats)?pats:[])];
+
+                const role = document.getElementById('filterRole')?.value || '';
+                const q = (document.getElementById('searchUser')?.value || '').toLowerCase();
+                if (role) users = users.filter(u => (u.rol||'').toLowerCase() === role);
+                if (q) users = users.filter(u => `${u.isim} ${u.soyisim}`.toLowerCase().includes(q));
+                users.sort((a,b)=>{
+                    const ra = a.rol==='doktor'?0:1, rb=b.rol==='doktor'?0:1;
+                    if(ra!==rb) return ra-rb;
+                    return (`${a.isim} ${a.soyisim}`).localeCompare(`${b.isim} ${b.soyisim}`,'tr');
+                });
+
+                const list = document.getElementById('usersList');
+                if(users.length===0){
+                    list.innerHTML = '<p class="text-gray-500">Kayıt yok</p>';
+                    return;
+                }
+                list.innerHTML = users.map(u=>`
+                    <div class="flex justify-between items-center bg-white border p-3 rounded">
+                        <div>
+                            <p class="font-semibold">${u.isim} ${u.soyisim}</p>
+                            <p class="text-xs text-gray-500">Rol: ${u.rol}${u.telefon ? ' | Tel: ' + u.telefon : ''}</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="px-3 py-1 rounded bg-yellow-500 text-white" 
+                                data-id="${u.id}" data-isim="${u.isim}" data-soyisim="${u.soyisim}" data-telefon="${u.telefon || ''}" data-rol="${u.rol}"
+                                onclick="editUserFromBtn(this)">Düzenle</button>
+                            <button class="px-3 py-1 rounded bg-red-600 text-white" onclick="deleteUser('${u.id}')">Sil</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.error('loadUsers:', e);
+            }
+        }
+
+        async function addUser(){
+            const role = document.getElementById('uRole').value;
+            const isim = document.getElementById('uIsim').value.trim();
+            const soyisim = document.getElementById('uSoyisim').value.trim();
+            const telefon = document.getElementById('uTelefon').value.trim();
+            const sifre = document.getElementById('uSifre').value.trim();
+            const msg = document.getElementById('userAddMsg');
+
+            if(!isim || !soyisim){ msg.innerHTML='<span class="text-red-600">İsim ve soyisim gerekli</span>'; return; }
+            if(!telefon){ msg.innerHTML='<span class="text-red-600">Telefon gerekli</span>'; return; }
+            
+            // Telefon sadece rakam içermeli
+            if(!/^[0-9]+$/.test(telefon)){
+                msg.innerHTML='<span class="text-red-600">❌ Telefon sadece rakam içermelidir</span>';
+                return;
+            }
+
+            try{
+                const res = await fetch(`${API_BASE}/add-user`,{
+                    method:'POST',
+                    headers:{'Content-Type':'application/json', 'Authorization': ADMIN_TOKEN},
+                    body:JSON.stringify({ isim, soyisim, telefon, rol: role, sifre })
+                });
+                
+                console.log('addUser status:', res.status);
+                
+                if(!res.ok){
+                    const errorText = await res.text();
+                    console.error('addUser error:', errorText);
+                    msg.innerHTML = '<span class="text-red-600">✗ HTTP Hata: '+res.status+'</span>';
+                    return;
+                }
+                
+                // Response'u text olarak oku
+                const responseText = await res.text();
+                console.log('addUser raw response:', responseText);
+                
+                // Eğer boş değilse JSON parse et
+                let out = {};
+                if(responseText && responseText.trim()){
+                    try {
+                        out = JSON.parse(responseText);
+                        console.log('addUser parsed response:', out);
+                    } catch(parseError) {
+                        console.error('addUser JSON parse error:', parseError);
+                        msg.innerHTML = '<span class="text-red-600">✗ Geçersiz JSON yanıtı</span>';
+                        return;
+                    }
+                }
+                
+                // Status 200 ise başarılı kabul et (n8n boş response döndürebilir)
+                if(res.status === 200){
+                    msg.innerHTML = '<span class="text-green-600">✓ Eklendi</span>';
+                    document.getElementById('uIsim').value='';
+                    document.getElementById('uSoyisim').value='';
+                    document.getElementById('uTelefon').value='';
+                    document.getElementById('uSifre').value='';
+                    setTimeout(() => { msg.innerHTML = ''; }, 2000);
+                    if(role==='doktor') { await loadDoctors(); populateDoktorDropdowns(); }
+                    loadUsers();
+                } else {
+                    msg.innerHTML = '<span class="text-red-600">✗ Beklenmeyen durum</span>';
+                }
+            }catch(e){
+                console.error('addUser exception:', e);
+                msg.innerHTML = '<span class="text-red-600">✗ Sunucu hatası: ' + e.message + '</span>';
+            }
+        }
+
+        function editUserFromBtn(btn){
+            editingUser = {
+                id: btn.dataset.id,
+                isim: btn.dataset.isim,
+                soyisim: btn.dataset.soyisim,
+                telefon: btn.dataset.telefon || '',
+                rol: btn.dataset.rol
+            };
+            openEditModal();
+        }
+
+        function openEditModal(){
+            document.getElementById('editIsim').value = editingUser.isim;
+            document.getElementById('editSoyisim').value = editingUser.soyisim;
+            document.getElementById('editTelefon').value = editingUser.telefon || '';
+            document.getElementById('editSifre').value = '';
+            
+            const sifreContainer = document.getElementById('editSifreContainer');
+            if(editingUser.rol === 'hasta'){
+                sifreContainer.classList.add('hidden');
+            } else {
+                sifreContainer.classList.remove('hidden');
+            }
+            
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        function closeEditModal(){
+            document.getElementById('editModal').classList.add('hidden');
+            editingUser = null;
+        }
+
+        async function saveUserEdit(){
+            const isim = document.getElementById('editIsim').value.trim();
+            const soyisim = document.getElementById('editSoyisim').value.trim();
+            const telefon = document.getElementById('editTelefon').value.trim();
+            const sifre = document.getElementById('editSifre').value.trim();
+
+            if(!isim || !soyisim){ alert('İsim ve soyisim boş bırakılamaz'); return; }
+            if(!telefon){ alert('Telefon boş bırakılamaz'); return; }
+            
+            // Telefon sadece rakam içermeli
+            if(!/^[0-9]+$/.test(telefon)){
+                alert('❌ Telefon sadece rakam içermelidir');
+                return;
+            }
+
+            const payload = { isim, soyisim, telefon };
+            if(editingUser.rol !== 'hasta' && sifre) payload.sifre = sifre;
+            
+            console.log('updateUser payload:', payload);
+            
+            try{
+                const res = await fetch(`${API_BASE}/update-user/?id=${editingUser.id}`,{
+                    method:'POST',
+                    headers:{'Content-Type':'application/json', 'Authorization': ADMIN_TOKEN},
+                    body:JSON.stringify(payload)
+                });
+                
+                console.log('updateUser status:', res.status);
+                
+                if(res.ok){
+                    const responseText = await res.text();
+                    console.log('updateUser raw response:', responseText);
+                    
+                    let result = {};
+                    if(responseText && responseText.trim()){
+                        try {
+                            result = JSON.parse(responseText);
+                            console.log('updateUser parsed response:', result);
+                        } catch(e) {
+                            console.error('updateUser JSON parse error:', e);
+                        }
+                    }
+                    
+                    // Modal kapatmadan önce rolü sakla
+                    const wasDoktor = editingUser.rol === 'doktor';
+                    
+                    alert('✓ Güncellendi');
+                    closeEditModal();
+                    
+                    if(wasDoktor) { await loadDoctors(); populateDoktorDropdowns(); }
+                    loadUsers();
+                }else{
+                    const errorText = await res.text().catch(() => 'Bilinmeyen hata');
+                    console.error('updateUser error:', errorText);
+                    alert('✗ Hata: ' + res.status);
+                }
+            }catch(e){
+                console.error('updateUser exception:', e);
+                alert('✗ Sunucu hatası: ' + e.message);
+            }
+        }
+
+        async function deleteUser(id){
+            if(!confirm('Kullanıcıyı silmek istediğinizden emin misiniz?')) return;
+            try{
+                const res = await fetch(`${API_BASE}/delete-user?id=${encodeURIComponent(id)}`,{
+                    method:'DELETE',
+                    headers: {'Authorization': ADMIN_TOKEN}
+                });
+                
+                console.log('deleteUser status:', res.status);
+                
+                if(res.ok){
+                    const result = await res.json().catch(() => ({}));
+                    console.log('deleteUser response:', result);
+                    alert('✓ Silindi');
+                    await loadDoctors();
+                    populateDoktorDropdowns();
+                    loadUsers();
+                }else{
+                    const errorText = await res.text().catch(() => 'Bilinmeyen hata');
+                    console.error('deleteUser error:', errorText);
+                    alert('✗ Hata: ' + res.status);
+                }
+            }catch(e){
+                console.error('deleteUser exception:', e);
+                alert('✗ Sunucu hatası: ' + e.message);
+            }
+        }
+
+        // Hizmet yönetimi
+        async function loadServices(){
+            try{
+                const res = await fetch(`${API_BASE}/get-services`);
+                let services = await res.json();
+                if(Array.isArray(services) && services.length>0 && services[0].json){
+                    services = services.map(s=>s.json);
+                }
+                const list = document.getElementById('servicesList');
+                if(!Array.isArray(services) || services.length===0){
+                    list.innerHTML = '<p class="text-gray-500">Henüz hizmet eklenmemiş</p>';
+                    return;
+                }
+                list.innerHTML = services.map(s=>`
+                    <div class="flex justify-between items-center bg-white border p-3 rounded">
+                        <div>
+                            <p class="font-semibold">${s.Isim || s.isim}</p>
+                            <p class="text-sm text-gray-500">Süre: ${s.Sure || s.sure} dakika</p>
+                        </div>
+                        <button class="px-3 py-1 rounded bg-red-600 text-white" onclick="deleteService('${s.ID || s.id}')">Sil</button>
+                    </div>
+                `).join('');
+            }catch(e){
+                console.error('loadServices:', e);
+            }
+        }
+
+        async function addService(){
+            const isim = document.getElementById('hizmetIsim').value.trim();
+            const sure = document.getElementById('hizmetSure').value.trim();
+            const msg = document.getElementById('serviceAddMsg');
+
+            if(!isim || !sure){ msg.innerHTML='<span class="text-red-600">Tüm alanlar gerekli</span>'; return; }
+
+            try{
+                const res = await fetch(`${API_BASE}/add-service`,{
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({isim, sure: parseInt(sure)})
+                });
+                const out = await res.json();
+                msg.innerHTML = (out.success && out.id)?'<span class="text-green-600">✓ Eklendi</span>':'<span class="text-red-600">✗ Hata</span>';
+                if(out.success && out.id){
+                    document.getElementById('hizmetIsim').value='';
+                    document.getElementById('hizmetSure').value='';
+                    setTimeout(() => { msg.innerHTML=''; loadServices(); }, 1000);
+                }
+            }catch(e){
+                console.error('addService:', e);
+                msg.innerHTML = '<span class="text-red-600">✗ Sunucu hatası</span>';
+            }
+        }
+
+        async function deleteService(id){
+            if(!confirm('Bu hizmeti silmek istediğinizden emin misiniz?')) return;
+            try{
+                const res = await fetch(`${API_BASE}/delete-service?id=${encodeURIComponent(id)}`,{method:'DELETE'});
+                if(res.ok){ alert('✓ Hizmet silindi'); loadServices(); }
+                else{ alert('✗ Silme başarısız'); }
+            }catch(e){
+                alert('✗ Hata oluştu');
+            }
+        }
+
+        // Müsaitlik yönetimi
+        async function loadAvailabilities(){
+            try{
+                // Tüm müsaitlikleri çek
+                const res = await fetch(`${API_BASE}/get-availabilities`);
+                let availabilities = await res.json();
+                if(Array.isArray(availabilities) && availabilities.length>0 && availabilities[0].json){
+                    availabilities = availabilities.map(a=>a.json);
+                }
+                
+                // Filtreleme yap
+                const searchName = (document.getElementById('searchAvDoktor')?.value || '').toLowerCase();
+                const searchDate = document.getElementById('searchAvTarih')?.value || '';
+                
+                if(searchName) {
+                    availabilities = availabilities.filter(av => (av.DoktorAdi || '').toLowerCase().includes(searchName));
+                }
+                if(searchDate) {
+                    availabilities = availabilities.filter(av => av.Tarih === searchDate);
+                }
+                
+                // Sıralama: Tarihe göre, sonra doktor adına göre
+                availabilities.sort((a, b) => {
+                    const dateCompare = (a.Tarih || '').localeCompare(b.Tarih || '');
+                    if(dateCompare !== 0) return dateCompare;
+                    return (a.DoktorAdi || '').localeCompare(b.DoktorAdi || '', 'tr');
+                });
+                
+                const list = document.getElementById('availabilitiesList');
+                if(!Array.isArray(availabilities) || availabilities.length===0){
+                    list.innerHTML = '<p class="text-gray-500">Kayıt yok</p>';
+                    return;
+                }
+                list.innerHTML = availabilities.map(av=>`
+                    <div class="flex justify-between items-center bg-white border p-3 rounded">
+                        <div>
+                            <p class="font-semibold">${av.DoktorAdi}</p>
+                            <p class="text-sm text-gray-500">${av.Tarih} | ${av.BaslangicSaati} - ${av.BitisSaati}</p>
+                        </div>
+                        <button class="px-3 py-1 rounded bg-red-600 text-white" onclick="deleteAvailability('${av.ID}')">Sil</button>
+                    </div>
+                `).join('');
+            }catch(e){
+                console.error('loadAvailabilities:', e);
+            }
+        }
+
+        async function addAvailability(){
+            const doktorId = document.getElementById('avDoktorId').value;
+            const tarih = document.getElementById('avTarih').value;
+            const baslangic = document.getElementById('avBaslangic').value;
+            const bitis = document.getElementById('avBitis').value;
+            const msg = document.getElementById('availabilityAddMsg');
+
+            if(!doktorId || !tarih || !baslangic || !bitis){
+                msg.innerHTML = '<span class="text-red-600">Tüm alanlar gerekli</span>';
+                return;
+            }
+
+            try{
+                console.log('addAvailability - doktorId:', doktorId, 'type:', typeof doktorId);
+                console.log('addAvailability - doctorsCache:', doctorsCache);
+                
+                // Hem string hem number karşılaştırması yap
+                const doktor = doctorsCache.find(d => String(d.id) === String(doktorId));
+                
+                console.log('addAvailability - found doktor:', doktor);
+                
+                if(!doktor){ 
+                    msg.innerHTML = '<span class="text-red-600">Doktor bulunamadı (ID: '+doktorId+')</span>'; 
+                    return; 
+                }
+                
+                const payload = {
+                    doktorId,
+                    doktorAdi: `${doktor.isim} ${doktor.soyisim}`,
+                    tarih,
+                    baslangicSaati: baslangic,
+                    bitisSaati: bitis
+                };
+                
+                console.log('addAvailability payload:', payload);
+                
+                const res = await fetch(`${API_BASE}/add-availability`,{
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify(payload)
+                });
+                
+                if(!res.ok){ 
+                    const errorText = await res.text().catch(() => '');
+                    console.error('addAvailability error:', res.status, errorText);
+                    msg.innerHTML = '<span class="text-red-600">✗ Hata: '+res.status+'</span>'; 
+                    return; 
+                }
+                
+                const out = await res.json();
+                console.log('addAvailability response:', out);
+                
+                // n8n {success: true, id: xxx} formatında döner
+                if(out.success && out.id){
+                    msg.innerHTML = '<span class="text-green-600">✓ Eklendi</span>';
+                    document.getElementById('avDoktorId').value='';
+                    document.getElementById('avTarih').value='';
+                    document.getElementById('avBaslangic').value='';
+                    document.getElementById('avBitis').value='';
+                    setTimeout(() => { msg.innerHTML=''; loadAvailabilities(); }, 1000);
+                }else{
+                    console.error('Unexpected response format:', out);
+                    msg.innerHTML = '<span class="text-red-600">✗ Beklenmeyen yanıt formatı</span>';
+                }
+            }catch(e){
+                console.error('addAvailability exception:', e);
+                msg.innerHTML = '<span class="text-red-600">✗ Sunucu hatası: ' + e.message + '</span>';
+            }
+        }
+
+        async function deleteAvailability(id){
+            if(!confirm('Bu müsaitliği silmek istediğinizden emin misiniz?')) return;
+            try{
+                console.log('deleteAvailability id:', id);
+                const res = await fetch(`${API_BASE}/delete-availability?id=${encodeURIComponent(id)}`,{method:'DELETE'});
+                
+                console.log('deleteAvailability status:', res.status);
+                
+                if(res.ok){ 
+                    const result = await res.json().catch(() => ({}));
+                    console.log('deleteAvailability response:', result);
+                    alert('✓ Müsaitlik silindi'); 
+                    loadAvailabilities(); 
+                }else{ 
+                    const errorText = await res.text().catch(() => 'Bilinmeyen hata');
+                    console.error('deleteAvailability error:', errorText);
+                    alert('✗ Silme başarısız: '+res.status); 
+                }
+            }catch(e){
+                console.error('deleteAvailability exception:', e);
+                alert('✗ Hata oluştu: ' + e.message);
+            }
+        }
+
+        // Takvim
+        async function loadCalendar(){
+            const startDate = document.getElementById('calStartDate').value;
+            const endDate = document.getElementById('calEndDate').value;
+            const doktorSearch = (document.getElementById('calDoktorSearch')?.value || '').toLowerCase().trim();
+            
+            if(!startDate || !endDate){
+                document.getElementById('calendarView').innerHTML = '<p class="text-gray-500">Lütfen tarih aralığı seçin</p>';
+                return;
+            }
+
+            try{
+                // Backend'e tarih aralığı gönder
+                let url = `${API_BASE}/get-appointments?baslangic=${startDate}&bitis=${endDate}`;
+                
+                console.log('loadCalendar - Requesting:', url);
+                
+                const res = await fetch(url);
+                
+                // Response durumunu kontrol et
+                if (!res.ok) {
+                    console.error('loadCalendar - HTTP Error:', res.status, res.statusText);
+                    const errorText = await res.text();
+                    console.error('loadCalendar - Error response:', errorText);
+                    document.getElementById('calendarView').innerHTML = `<p class="text-red-500">Hata: ${res.status} ${res.statusText}</p>`;
+                    return;
+                }
+                
+                // Response body'yi text olarak al
+                const responseText = await res.text();
+                console.log('loadCalendar - Raw response:', responseText.substring(0, 500));
+                
+                // Boş response kontrolu
+                if (!responseText || responseText.trim() === '') {
+                    console.warn('loadCalendar - Empty response from server');
+                    document.getElementById('calendarView').innerHTML = '<p class="text-gray-500">Sunucudan boş yanıt geldi</p>';
+                    return;
+                }
+                
+                // JSON parse et
+                let appointments;
+                try {
+                    appointments = JSON.parse(responseText);
+                } catch (parseError) {
+                    console.error('loadCalendar - JSON Parse Error:', parseError);
+                    console.error('loadCalendar - Invalid JSON:', responseText);
+                    document.getElementById('calendarView').innerHTML = '<p class="text-red-500">Geçersiz veri formatı</p>';
+                    return;
+                }
+                
+                // n8n formatından dönüştürme
+                if(Array.isArray(appointments) && appointments.length>0 && appointments[0].json){
+                    appointments = appointments.map(a=>a.json);
+                }
+                
+                console.log('loadCalendar - Received appointments:', appointments.length);
+                console.log('loadCalendar - Sample data:', appointments[0]);
+                
+                // Doktor veya hasta ismi ile client-side filtreleme (textbox için)
+                if(doktorSearch && Array.isArray(appointments)){
+                    appointments = appointments.filter(apt => 
+                        (apt.DoktorAdi || '').toLowerCase().includes(doktorSearch) ||
+                        (apt.HastaAdi || '').toLowerCase().includes(doktorSearch)
+                    );
+                    console.log('loadCalendar - After name filter:', appointments.length);
+                }
+                
+                // Durum filtresi
+                const durumFilter = (document.getElementById('calDurumFilter')?.value || '').toLowerCase();
+                if(durumFilter && Array.isArray(appointments)){
+                    appointments = appointments.filter(apt => 
+                        (apt.Durum || '').toLowerCase() === durumFilter
+                    );
+                    console.log('loadCalendar - After durum filter:', appointments.length);
+                }
+                
+                const view = document.getElementById('calendarView');
+                if(!Array.isArray(appointments) || appointments.length===0){
+                    view.innerHTML = '<p class="text-gray-500">Bu tarih aralığında randevu yok</p>';
+                    return;
+                }
+
+                // Tarihe göre grupla
+                const grouped = {};
+                appointments.forEach(apt => {
+                    const date = apt.Tarih;
+                    if(!grouped[date]) grouped[date] = [];
+                    grouped[date].push(apt);
+                });
+
+                let html = '';
+                Object.keys(grouped).sort().forEach(date => {
+                    html += `<div class="mb-4"><h3 class="font-bold text-lg mb-2">${date}</h3>`;
+                    grouped[date].sort((a,b)=>a.Saat.localeCompare(b.Saat)).forEach(apt => {
+                        // Durum rengini belirle
+                        let durumColor = 'border-blue-500';
+                        if(apt.Durum === 'iptal') durumColor = 'border-red-500';
+                        else if(apt.Durum === 'beklemede') durumColor = 'border-yellow-500';
+                        else if(apt.Durum === 'tamamlandı') durumColor = 'border-green-500';
+                        
+                        html += `
+                            <div class="flex justify-between items-center border-l-4 ${durumColor} bg-gray-50 p-3 mb-2 rounded">
+                                <div class="flex-1">
+                                    <p class="font-semibold">${apt.Saat} - ${apt.HastaAdi} → ${apt.DoktorAdi}</p>
+                                    <p class="text-sm text-gray-600">Durum: ${apt.Durum} | Tel: ${apt.HastaTelefon || 'Yok'}</p>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="px-3 py-1 rounded bg-blue-500 text-white text-sm hover:bg-blue-600" 
+                                        onclick="editAppointment('${apt.ID}')">Düzenle</button>
+                                    <button class="px-3 py-1 rounded bg-red-600 text-white text-sm hover:bg-red-700" 
+                                        onclick="deleteAppointment('${apt.ID}')">Sil</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                });
+                view.innerHTML = html;
+            }catch(e){
+                console.error('loadCalendar:', e);
+                document.getElementById('calendarView').innerHTML = '<p class="text-red-500">Hata oluştu</p>';
+            }
+        }
+
+        // Randevu Yönetimi Fonksiyonları
+        let editingAppointment = null;
+
+        async function createAppointment() {
+            const doktorId = document.getElementById('aptDoktorId').value;
+            const hastaIsim = document.getElementById('aptHastaIsim').value.trim();
+            const telefon = document.getElementById('aptHastaTelefon').value.trim();
+            const hizmetId = document.getElementById('aptHizmetId').value;
+            const tarih = document.getElementById('aptTarih').value;
+            const saat = document.getElementById('aptSaat').value;
+            const durum = document.getElementById('aptDurum').value;
+            const msg = document.getElementById('aptCreateMsg');
+
+            if (!doktorId || !hastaIsim || !telefon || !tarih || !saat) {
+                msg.innerHTML = '<span class="text-red-600">Tüm alanlar gerekli (*)</span>';
+                return;
+            }
+
+            // Telefon validasyonu
+            if (!/^[0-9]+$/.test(telefon)) {
+                msg.innerHTML = '<span class="text-red-600">❌ Telefon sadece rakam içermelidir</span>';
+                return;
+            }
+
+            // Doktor bilgisini bul
+            const doktor = doctorsCache.find(d => String(d.id) === String(doktorId));
+            if (!doktor) {
+                msg.innerHTML = '<span class="text-red-600">Doktor bulunamadı</span>';
+                return;
+            }
+
+            // Hizmet bilgisini bul (opsiyonel)
+            let hizmet = null;
+            let hizmetIsim = '';
+            if (hizmetId) {
+                hizmet = servicesCache.find(s => String(s.ID || s.id) === String(hizmetId));
+                hizmetIsim = hizmet ? (hizmet.Isim || hizmet.isim) : '';
+            }
+
+            try {
+                const payload = {
+                    hastaIsim,
+                    hastaTelefon: telefon,
+                    doktorId,
+                    doktorAdi: `${doktor.isim} ${doktor.soyisim}`,
+                    hizmetId: hizmetId || '',
+                    hizmet: hizmetIsim,
+                    tarih,
+                    saat,
+                    durum
+                };
+
+                console.log('createAppointment payload:', payload);
+
+                const res = await fetch(`${API_BASE}/add-appointment`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) {
+                    const errorText = await res.text().catch(() => '');
+                    console.error('createAppointment error:', res.status, errorText);
+                    msg.innerHTML = '<span class="text-red-600">✗ Hata: ' + res.status + '</span>';
+                    return;
+                }
+
+                const responseText = await res.text();
+                let out = {};
+                if (responseText && responseText.trim()) {
+                    try {
+                        out = JSON.parse(responseText);
+                    } catch (e) {
+                        console.error('JSON parse error:', e);
+                    }
+                }
+
+                if (res.status === 200) {
+                    msg.innerHTML = '<span class="text-green-600">✓ Randevu oluşturuldu</span>';
+                    document.getElementById('aptDoktorId').value = '';
+                    document.getElementById('aptHastaIsim').value = '';
+                    document.getElementById('aptHastaTelefon').value = '';
+                    document.getElementById('aptHizmetId').value = '';
+                    document.getElementById('aptTarih').value = '';
+                    document.getElementById('aptSaat').value = '';
+                    document.getElementById('aptDurum').value = 'onaylandı';
+                    setTimeout(() => { msg.innerHTML = ''; loadCalendar(); }, 2000);
+                } else {
+                    msg.innerHTML = '<span class="text-red-600">✗ Beklenmeyen durum</span>';
+                }
+            } catch (e) {
+                console.error('createAppointment exception:', e);
+                msg.innerHTML = '<span class="text-red-600">✗ Sunucu hatası: ' + e.message + '</span>';
+            }
+        }
+
+        async function editAppointment(id) {
+            try {
+                // Randevu bilgilerini çek
+                const startDate = document.getElementById('calStartDate').value;
+                const endDate = document.getElementById('calEndDate').value;
+                const url = `${API_BASE}/get-appointments?baslangic=${startDate}&bitis=${endDate}`;
+                
+                const res = await fetch(url);
+                const responseText = await res.text();
+                let appointments = JSON.parse(responseText);
+                
+                if (Array.isArray(appointments) && appointments.length > 0 && appointments[0].json) {
+                    appointments = appointments.map(a => a.json);
+                }
+                
+                const apt = appointments.find(a => String(a.ID) === String(id));
+                if (!apt) {
+                    alert('Randevu bulunamadı');
+                    return;
+                }
+                
+                editingAppointment = apt;
+                
+                // Modal'i doldur
+                document.getElementById('editAptHastaIsim').value = apt.HastaAdi || '';
+                document.getElementById('editAptTelefon').value = apt.HastaTelefon || '';
+                document.getElementById('editAptDoktorId').value = apt.DoktorID || '';
+                document.getElementById('editAptHizmetId').value = apt.HizmetID || '';
+                document.getElementById('editAptTarih').value = apt.Tarih || '';
+                document.getElementById('editAptSaat').value = apt.Saat || '';
+                document.getElementById('editAptDurum').value = apt.Durum || 'onaylandı';
+                
+                document.getElementById('editAppointmentModal').classList.remove('hidden');
+            } catch (e) {
+                console.error('editAppointment error:', e);
+                alert('Randevu bilgileri yüklenemedi');
+            }
+        }
+
+        function closeAppointmentModal() {
+            document.getElementById('editAppointmentModal').classList.add('hidden');
+            editingAppointment = null;
+        }
+
+        async function saveAppointmentEdit() {
+            if (!editingAppointment) return;
+            
+            const doktorId = document.getElementById('editAptDoktorId').value;
+            const hizmetId = document.getElementById('editAptHizmetId').value;
+            const tarih = document.getElementById('editAptTarih').value;
+            const saat = document.getElementById('editAptSaat').value;
+            const durum = document.getElementById('editAptDurum').value;
+            
+            if (!doktorId || !tarih || !saat) {
+                alert('Tüm alanlar gerekli');
+                return;
+            }
+            
+            const doktor = doctorsCache.find(d => String(d.id) === String(doktorId));
+            if (!doktor) {
+                alert('Doktor bulunamadı');
+                return;
+            }
+            
+            // Hizmet bilgisi (opsiyonel)
+            let hizmetIsim = '';
+            if (hizmetId) {
+                const hizmet = servicesCache.find(s => String(s.ID || s.id) === String(hizmetId));
+                hizmetIsim = hizmet ? (hizmet.Isim || hizmet.isim) : '';
+            }
+            
+            try {
+                const payload = {
+                    doktorId,
+                    doktorAdi: `${doktor.isim} ${doktor.soyisim}`,
+                    hizmetId: hizmetId || '',
+                    hizmet: hizmetIsim,
+                    tarih,
+                    saat,
+                    durum
+                };
+                
+                console.log('updateAppointment payload:', payload);
+                
+                const res = await fetch(`${API_BASE}/update-appointment?id=${encodeURIComponent(editingAppointment.ID)}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': ADMIN_TOKEN },
+                    body: JSON.stringify(payload)
+                });
+                
+                console.log('updateAppointment status:', res.status);
+                
+                if (res.ok) {
+                    alert('✓ Randevu güncellendi');
+                    closeAppointmentModal();
+                    loadCalendar();
+                } else {
+                    const errorText = await res.text().catch(() => 'Bilinmeyen hata');
+                    console.error('updateAppointment error:', errorText);
+                    alert('✗ Hata: ' + res.status);
+                }
+            } catch (e) {
+                console.error('updateAppointment exception:', e);
+                alert('✗ Sunucu hatası: ' + e.message);
+            }
+        }
+
+        async function deleteAppointment(id) {
+            if (!confirm('Bu randevuyu kalıcı olarak silmek istediğinizden emin misiniz?')) return;
+            
+            try {
+                const res = await fetch(`${API_BASE}/delete-appointment?id=${encodeURIComponent(id)}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': ADMIN_TOKEN }
+                });
+                
+                console.log('deleteAppointment status:', res.status);
+                
+                if (res.ok) {
+                    alert('✓ Randevu silindi');
+                    loadCalendar();
+                } else {
+                    const errorText = await res.text().catch(() => 'Bilinmeyen hata');
+                    console.error('deleteAppointment error:', errorText);
+                    alert('✗ Silme başarısız: ' + res.status);
+                }
+            } catch (e) {
+                console.error('deleteAppointment exception:', e);
+                alert('✗ Hata oluştu: ' + e.message);
+            }
+        }
+    </script>
+</body>
+</html>

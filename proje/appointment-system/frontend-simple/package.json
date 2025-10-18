@@ -1,0 +1,13 @@
+{
+  "name": "randevu-frontend",
+  "version": "1.0.0",
+  "description": "Basit Randevu Sistemi Frontend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["randevu", "n8n", "frontend"],
+  "author": "",
+  "license": "MIT"
+}

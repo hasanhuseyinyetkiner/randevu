@@ -1,0 +1,10 @@
+powershellde "n8n-project" klasörüne gir
+>npm start
+
+"appointment-system\frontend-simple" klasörüne gir
+>npm start
+
+frontend ve backendi çalıştırabilirsin bu şekilde.
+
+json dosyaları API bağlantıları için iş görür ancak hesabımdaki google sheet üzerindeki excelden veri alıyor. O sorun olur mu bilmiyorum.
+Anydeskte en son gördüğün halde bıraktım konuştuktan sonra gram bakasım gelmedi. Öptüm bebeğim <3 adsfkjshdaf

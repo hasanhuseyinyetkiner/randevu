@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Paneli</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-indigo-50 to-purple-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-6xl mx-auto">
+            <div class="bg-white rounded-2xl shadow-xl p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900" id="userName"></h1>
+                        <p class="text-gray-600">Admin Paneli</p>
+                    </div>
+                    <button onclick="logout()" 
+                        class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
+                        Çıkış
+                    </button>
+                </div>
+
+                <!-- Tabs -->
+                <div class="flex border-b mb-6 overflow-x-auto">
+                    <button onclick="showTab('users')" id="tab-users" class="px-6 py-3 font-semibold border-b-2 border-indigo-600 text-indigo-600 whitespace-nowrap">Kullanıcılar</button>
+                    <button onclick="showTab('appointments')" id="tab-appointments" class="px-6 py-3 font-semibold text-gray-500 hover:text-gray-700 whitespace-nowrap">Randevular</button>
+                    <button onclick="showTab('services')" id="tab-services" class="px-6 py-3 font-semibold text-gray-500 hover:text-gray-700 whitespace-nowrap">Hizmetler</button>
+                    <button onclick="showTab('availability')" id="tab-availability" class="px-6 py-3 font-semibold text-gray-500 hover:text-gray-700 whitespace-nowrap">Müsaitlik</button>
+                </div>
+
+                <!-- KULLANICILAR TAB -->
+                <div id="content-users" class="tab-content">
+                    <h2 class="text-2xl font-bold mb-4">Kullanıcı Yönetimi</h2>
+                    
+                    <!-- Kullanıcı Ekleme -->
+                    <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                        <h3 class="font-semibold mb-3">Yeni Kullanıcı Ekle</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-6 gap-3">
+                            <select id="userRole" class="px-3 py-2 border rounded-lg">
+                                <option value="doktor">Doktor</option>
+                                <option value="hasta">Hasta</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                            <input id="userIsim" placeholder="İsim" class="px-3 py-2 border rounded-lg"/>
+                            <input id="userSoyisim" placeholder="Soyisim" class="px-3 py-2 border rounded-lg"/>
+                            <input id="userTelefon" placeholder="Telefon" class="px-3 py-2 border rounded-lg"/>
+                            <input id="userSifre" type="password" placeholder="Şifre (Doktor/Admin)" class="px-3 py-2 border rounded-lg"/>
+                            <button onclick="addUser()" class="bg-green-600 text-white py-2 rounded-lg hover:bg-green-700">+ Ekle</button>
+                        </div>
+                        <div id="userAddMsg" class="mt-2 text-sm"></div>
+                    </div>
+
+                    <!-- Kullanıcı Listesi -->
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-xl font-semibold">Kullanıcı Listesi</h3>
+                        <div class="flex gap-2">
+                            <select id="filterRole" class="px-3 py-2 border rounded-lg text-sm">
+                                <option value="">Tüm Roller</option>
+                                <option value="admin">Admin</option>
+                                <option value="doktor">Doktor</option>
+                                <option value="hasta">Hasta</option>
+                            </select>
+                            <button onclick="loadUsers()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">🔄 Yenile</button>
+                        </div>
+                    </div>
+                    <div id="usersList" class="space-y-2"></div>
+                </div>
+
+                <!-- RANDEVULAR TAB -->
+                <div id="content-appointments" class="tab-content hidden">
+                    <h2 class="text-2xl font-bold mb-4">Randevu Yönetimi</h2>
+                    
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-xl font-semibold">Randevu Listesi</h3>
+                        <button onclick="loadAppointments()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">🔄 Yenile</button>
+                    </div>
+                    <div id="appointmentsList" class="space-y-2"></div>
+                </div>
+
+                <!-- HİZMETLER TAB -->
+                <div id="content-services" class="tab-content hidden">
+                    <h2 class="text-2xl font-bold mb-4">Hizmet Yönetimi</h2>
+                    
+                    <!-- Hizmet Ekleme -->
+                    <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                        <h3 class="font-semibold mb-3">Yeni Hizmet Ekle</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <input id="serviceIsim" placeholder="Hizmet Adı" class="px-3 py-2 border rounded-lg"/>
+                            <input id="serviceSure" type="number" placeholder="Süre (dakika)" class="px-3 py-2 border rounded-lg"/>
+                            <button onclick="addService()" class="bg-green-600 text-white py-2 rounded-lg hover:bg-green-700">+ Ekle</button>
+                        </div>
+                        <div id="serviceAddMsg" class="mt-2 text-sm"></div>
+                    </div>
+
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-xl font-semibold">Hizmet Listesi</h3>
+                        <button onclick="loadServices()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">🔄 Yenile</button>
+                    </div>
+                    <div id="servicesList" class="space-y-2"></div>
+                </div>
+
+                <!-- MÜSAİTLİK TAB -->
+                <div id="content-availability" class="tab-content hidden">
+                    <h2 class="text-2xl font-bold mb-4">Doktor Müsaitlik Yönetimi</h2>
+                    
+                    <!-- Müsaitlik Ekleme -->
+                    <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                        <h3 class="font-semibold mb-3">Yeni Müsaitlik Ekle</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+                            <select id="availDoktorId" class="px-3 py-2 border rounded-lg">
+                                <option value="">Doktor Seçin</option>
+                            </select>
+                            <input id="availTarih" type="date" class="px-3 py-2 border rounded-lg"/>
+                            <input id="availBaslangic" type="time" placeholder="Başlangıç" class="px-3 py-2 border rounded-lg"/>
+                            <input id="availBitis" type="time" placeholder="Bitiş" class="px-3 py-2 border rounded-lg"/>
+                            <button onclick="addAvailability()" class="bg-green-600 text-white py-2 rounded-lg hover:bg-green-700">+ Ekle</button>
+                        </div>
+                        <div id="availAddMsg" class="mt-2 text-sm"></div>
+                    </div>
+
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-xl font-semibold">Müsaitlik Listesi</h3>
+                        <button onclick="loadAvailabilities()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">🔄 Yenile</button>
+                    </div>
+                    <div id="availabilitiesList" class="space-y-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3001/api';
+        const ADMIN_TOKEN = 'Bearer admin_secret_2025_xyz123';
+        let currentUser = null;
+
+        window.onload = function() {
+            const userData = localStorage.getItem('currentUser');
+            if (!userData) {
+                window.location.href = 'index.html';
+                return;
+            }
+            currentUser = JSON.parse(userData);
+            if (currentUser.rol !== 'admin') {
+                window.location.href = 'index.html';
+                return;
+            }
+            document.getElementById('userName').textContent = `${currentUser.isim} ${currentUser.soyisim}`;
+            loadUsers();
+            loadDoctorsForAvailability();
+        };
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        }
+
+        function showTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('[id^="tab-"]').forEach(el => {
+                el.classList.remove('border-indigo-600', 'text-indigo-600');
+                el.classList.add('text-gray-500');
+            });
+            
+            document.getElementById(`content-${tab}`).classList.remove('hidden');
+            document.getElementById(`tab-${tab}`).classList.add('border-indigo-600', 'text-indigo-600');
+            document.getElementById(`tab-${tab}`).classList.remove('text-gray-500');
+
+            // Tab'a özel yükleme
+            if (tab === 'users') loadUsers();
+            if (tab === 'appointments') loadAppointments();
+            if (tab === 'services') loadServices();
+            if (tab === 'availability') loadAvailabilities();
+        }
+
+        // KULLANICI FONKSİYONLARI
+        async function addUser() {
+            const data = {
+                rol: document.getElementById('userRole').value,
+                isim: document.getElementById('userIsim').value,
+                soyisim: document.getElementById('userSoyisim').value,
+                telefon: document.getElementById('userTelefon').value,
+                sifre: document.getElementById('userSifre').value
+            };
+
+            const response = await fetch(`${API_BASE}/add-user`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': ADMIN_TOKEN
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            document.getElementById('userAddMsg').innerHTML = result.success 
+                ? '<span class="text-green-600">✓ Kullanıcı eklendi!</span>'
+                : '<span class="text-red-600">✗ Hata: ' + (result.message || 'Bilinmeyen hata') + '</span>';
+
+            if (result.success) {
+                document.getElementById('userIsim').value = '';
+                document.getElementById('userSoyisim').value = '';
+                document.getElementById('userTelefon').value = '';
+                document.getElementById('userSifre').value = '';
+                setTimeout(loadUsers, 500);
+            }
+        }
+
+        async function loadUsers() {
+            const role = document.getElementById('filterRole').value;
+            const url = role ? `${API_BASE}/get-users?rol=${role}` : `${API_BASE}/get-users`;
+            const response = await fetch(url);
+            const users = await response.json();
+            const list = document.getElementById('usersList');
+
+            if (users.length === 0) {
+                list.innerHTML = '<p class="text-gray-500">Kullanıcı bulunamadı</p>';
+                return;
+            }
+
+            list.innerHTML = users.map(user => `
+                <div class="bg-gray-50 p-4 rounded-lg flex justify-between items-center">
+                    <div>
+                        <p class="font-semibold">${user.isim} ${user.soyisim}</p>
+                        <p class="text-sm text-gray-600">Rol: ${user.rol} | Tel: ${user.telefon || 'Yok'}</p>
+                    </div>
+                    <button onclick="deleteUser('${user.id}')" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Sil</button>
+                </div>
+            `).join('');
+        }
+
+        async function deleteUser(id) {
+            if (!confirm('Bu kullanıcıyı silmek istediğinize emin misiniz?')) return;
+
+            const response = await fetch(`${API_BASE}/delete-user?id=${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': ADMIN_TOKEN }
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                loadUsers();
+            } else {
+                alert('Silme başarısız: ' + (result.error || 'Bilinmeyen hata'));
+            }
+        }
+
+        // RANDEVU FONKSİYONLARI
+        async function loadAppointments() {
+            const response = await fetch(`${API_BASE}/get-appointments`);
+            const appointments = await response.json();
+            const list = document.getElementById('appointmentsList');
+
+            if (appointments.length === 0) {
+                list.innerHTML = '<p class="text-gray-500">Randevu bulunamadı</p>';
+                return;
+            }
+
+            list.innerHTML = appointments.map(apt => `
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="font-semibold">${apt.HastaAdi} → Dr. ${apt.DoktorAdi}</p>
+                            <p class="text-sm text-gray-600">${apt.Tarih} ${apt.Saat}</p>
+                        </div>
+                        <div class="flex gap-2 items-center">
+                            <select onchange="updateAppointmentStatus('${apt.ID}', this.value)"
+                                class="text-sm border rounded px-2 py-1">
+                                <option value="bekliyor" ${apt.Durum === 'bekliyor' ? 'selected' : ''}>⏳ Bekliyor</option>
+                                <option value="onaylandı" ${apt.Durum === 'onaylandı' ? 'selected' : ''}>✓ Onaylandı</option>
+                                <option value="iptal" ${apt.Durum === 'iptal' ? 'selected' : ''}>✗ İptal</option>
+                            </select>
+                            <button onclick="deleteAppointment('${apt.ID}')" class="bg-red-500 text-white px-2 py-1 rounded text-sm hover:bg-red-600">Sil</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function updateAppointmentStatus(id, durum) {
+            await fetch(`${API_BASE}/update-appointment?id=${id}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ durum })
+            });
+            setTimeout(loadAppointments, 500);
+        }
+
+        async function deleteAppointment(id) {
+            if (!confirm('Bu randevuyu silmek istediğinize emin misiniz?')) return;
+
+            const response = await fetch(`${API_BASE}/delete-appointment?id=${id}`, {
+                method: 'DELETE'
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                loadAppointments();
+            }
+        }
+
+        // HİZMET FONKSİYONLARI
+        async function addService() {
+            const data = {
+                isim: document.getElementById('serviceIsim').value,
+                sure: document.getElementById('serviceSure').value
+            };
+
+            const response = await fetch(`${API_BASE}/add-service`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            document.getElementById('serviceAddMsg').innerHTML = result.success 
+                ? '<span class="text-green-600">✓ Hizmet eklendi!</span>'
+                : '<span class="text-red-600">✗ Hata!</span>';
+
+            if (result.success) {
+                document.getElementById('serviceIsim').value = '';
+                document.getElementById('serviceSure').value = '';
+                setTimeout(loadServices, 500);
+            }
+        }
+
+        async function loadServices() {
+            const response = await fetch(`${API_BASE}/get-services`);
+            const services = await response.json();
+            const list = document.getElementById('servicesList');
+
+            if (services.length === 0) {
+                list.innerHTML = '<p class="text-gray-500">Hizmet bulunamadı</p>';
+                return;
+            }
+
+            list.innerHTML = services.map(service => `
+                <div class="bg-gray-50 p-4 rounded-lg flex justify-between items-center">
+                    <div>
+                        <p class="font-semibold">${service.Isim}</p>
+                        <p class="text-sm text-gray-600">Süre: ${service.Sure} dakika</p>
+                    </div>
+                    <button onclick="deleteService('${service.ID}')" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Sil</button>
+                </div>
+            `).join('');
+        }
+
+        async function deleteService(id) {
+            if (!confirm('Bu hizmeti silmek istediğinize emin misiniz?')) return;
+
+            await fetch(`${API_BASE}/delete-service?id=${id}`, {
+                method: 'DELETE'
+            });
+            loadServices();
+        }
+
+        // MÜSAİTLİK FONKSİYONLARI
+        async function loadDoctorsForAvailability() {
+            const response = await fetch(`${API_BASE}/get-users?rol=doktor`);
+            const doctors = await response.json();
+            const select = document.getElementById('availDoktorId');
+            
+            select.innerHTML = '<option value="">Doktor Seçin</option>' + 
+                doctors.map(doc => `<option value="${doc.id}">${doc.isim} ${doc.soyisim}</option>`).join('');
+        }
+
+        async function addAvailability() {
+            const doktorId = document.getElementById('availDoktorId').value;
+            const select = document.getElementById('availDoktorId');
+            const doktorAdi = select.options[select.selectedIndex].text;
+
+            const data = {
+                doktorId,
+                doktorAdi,
+                tarih: document.getElementById('availTarih').value,
+                baslangicSaati: document.getElementById('availBaslangic').value,
+                bitisSaati: document.getElementById('availBitis').value
+            };
+
+            const response = await fetch(`${API_BASE}/add-availability`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            document.getElementById('availAddMsg').innerHTML = result.success 
+                ? '<span class="text-green-600">✓ Müsaitlik eklendi!</span>'
+                : '<span class="text-red-600">✗ Hata!</span>';
+
+            if (result.success) {
+                document.getElementById('availTarih').value = '';
+                document.getElementById('availBaslangic').value = '';
+                document.getElementById('availBitis').value = '';
+                setTimeout(loadAvailabilities, 500);
+            }
+        }
+
+        async function loadAvailabilities() {
+            const response = await fetch(`${API_BASE}/get-availabilities`);
+            const availabilities = await response.json();
+            const list = document.getElementById('availabilitiesList');
+
+            if (availabilities.length === 0) {
+                list.innerHTML = '<p class="text-gray-500">Müsaitlik bulunamadı</p>';
+                return;
+            }
+
+            list.innerHTML = availabilities.map(avail => `
+                <div class="bg-gray-50 p-4 rounded-lg flex justify-between items-center">
+                    <div>
+                        <p class="font-semibold">Dr. ${avail.DoktorAdi}</p>
+                        <p class="text-sm text-gray-600">${avail.Tarih} | ${avail.BaslangicSaati} - ${avail.BitisSaati}</p>
+                    </div>
+                    <button onclick="deleteAvailability('${avail.ID}')" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Sil</button>
+                </div>
+            `).join('');
+        }
+
+        async function deleteAvailability(id) {
+            if (!confirm('Bu müsaitliği silmek istediğinize emin misiniz?')) return;
+
+            await fetch(`${API_BASE}/delete-availability?id=${id}`, {
+                method: 'DELETE'
+            });
+            loadAvailabilities();
+        }
+    </script>
+</body>
+</html>
